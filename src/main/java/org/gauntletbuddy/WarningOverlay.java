@@ -4,57 +4,50 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.api.Client;
+import org.gauntletbuddy.config.GauntletBuddyConfig;
 
 import javax.inject.Inject;
 import java.awt.*;
 
 public class WarningOverlay extends Overlay {
-    private boolean flash = false;
-    private boolean visible = true;
+    private final Client client;
+    private final GauntletBuddyConfig config;
+    private final GauntletBuddy plugin;
+
     private long lastFlash = 0;
     private final int flashIntervalMS = 500;
-    private final Client client;
-
+    private boolean flash = false;
 
     @Inject
-    public WarningOverlay(Client client)
+    public WarningOverlay(Client client, GauntletBuddyConfig config, GauntletBuddy plugin)
     {
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
         this.client = client;
-    }
-
-    public void trigger()
-    {
-        flash = true;
-        lastFlash = System.currentTimeMillis();
-    }
-
-    public void halt()
-    {
-        flash = false;
-        visible = false;
+        this.config = config;
+        this.plugin = plugin;
     }
 
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        if (!flash) return null;
+        if (!plugin.isInside() || !plugin.isBossing() || !config.hunllefPrayerSwapAlert() || !(plugin.getHitsLanded() == 5)) return null;
 
         long now = System.currentTimeMillis();
         long elapsed = now - lastFlash;
 
         if (elapsed > flashIntervalMS)
         {
-            visible = !visible;
             lastFlash = now;
+            flash = !flash;
         }
 
-        if (!visible) return null;
+        if (!flash) return null;
 
-        Point offset = client.getCanvas().getLocation();
+        Canvas canvas = client.getCanvas();
+        Point offset = canvas.getLocation();
         graphics.setColor(new Color(255, 0, 0, 50));
-        graphics.fillRect(-offset.x, -offset.y, client.getCanvas().getWidth(), client.getCanvas().getHeight());
+        graphics.fillRect(offset.x, offset.y, canvas.getWidth(), canvas.getHeight());
 
         return null;
     }

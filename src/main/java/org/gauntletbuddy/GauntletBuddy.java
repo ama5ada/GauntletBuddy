@@ -2,6 +2,8 @@ package org.gauntletbuddy;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
+
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.*;
@@ -14,11 +16,16 @@ import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.AttackStyleType;
 
 import static java.util.Objects.nonNull;
+import static net.runelite.api.gameval.VarbitID.GAUNTLET_BOSS_STARTED;
+import static net.runelite.api.gameval.VarbitID.GAUNTLET_START;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Gauntlet Buddy"
+		name = "Gauntlet Buddy",
+		description = "Helper plugin for The Gauntlet",
+		tags = "combat"
 )
+
 public class GauntletBuddy extends Plugin
 {
 	@Inject
@@ -27,10 +34,20 @@ public class GauntletBuddy extends Plugin
 	@Inject
 	private GauntletBuddyConfig config;
 
+	@Provides
+	GauntletBuddyConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(GauntletBuddyConfig.class);
+	}
+
 	@Inject
 	private WarningOverlay warningOverlay;
 	@Inject
 	private PrayerOverlay prayerOverlay;
+	@Inject
+	private CounterOverlay counterOverlay;
+	@Inject
+	private DebugOverlay debugOverlay;
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -38,26 +55,54 @@ public class GauntletBuddy extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		log.info("Gauntlet Buddy started!");
+		initVars();
 		overlayManager.add(warningOverlay);
 		overlayManager.add(prayerOverlay);
+		overlayManager.add(counterOverlay);
+		overlayManager.add(debugOverlay);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Gauntlet Buddy stopped!");
 		overlayManager.remove(warningOverlay);
+		overlayManager.remove(prayerOverlay);
+		overlayManager.remove(counterOverlay);
+		overlayManager.remove(debugOverlay);
 	}
 
-	private void triggerWarning()
+	/**
+	 * Method to initialize all starting values on plugin load
+	 */
+	private void initVars()
 	{
-		warningOverlay.trigger();
+		prayStyle = AttackStyleType.RANGE;
+		hitsLanded = 0;
+		gatheredOre = 0;
+		gatheredBark = 0;
+		gatheredLinen = 0;
+		gatheredFrames = 0;
+		gatheredShards = 0;
+		gatheredFish = 0;
+		hasString = false;
+		hasOrb = false;
+		hasSpike = false;
+		bossing = false;
+		inside = false;
 	}
 
-	private void haltWarning()
+	private void resetVars()
 	{
-		warningOverlay.halt();
+		prayStyle = AttackStyleType.RANGE;
+		hitsLanded = 0;
+		gatheredOre = 0;
+		gatheredBark = 0;
+		gatheredLinen = 0;
+		gatheredFrames = 0;
+		gatheredFish = 0;
+		hasString = false;
+		hasOrb = false;
+		hasSpike = false;
 	}
 
 	@Subscribe
@@ -65,20 +110,58 @@ public class GauntletBuddy extends Plugin
 	{
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Tracking Items : " + config.trackItems(), null);
+			inside = client.getVarbitValue(GAUNTLET_START) != 0;
+			if (!inside) {
+				bossing = false;
+				resetVars();
+			}
 		}
-		AttackStyleType prayStyle = AttackStyleType.RANGE;
-		int hitsLanded = 0;
-		haltWarning();
 	}
 
-	AttackStyleType prayStyle = AttackStyleType.RANGE;
-	int hitsLanded = 0;
-	boolean DEBUG = false;
+	@Subscribe
+	public  void onGameTick(GameTick gameTick)
+	{
+		// Early exit if not inside the gauntlet or already in boss no checks need to be run
+		if (!inside || bossing) return;
+		// If inside but not bossing check if the boss has been started in the last game tick to start boss checks
+		bossing = client.getVarbitValue(GAUNTLET_BOSS_STARTED) != 0;
+	}
+
+	private final boolean DEBUG = false;
+
+	@Getter
+	private AttackStyleType prayStyle;
+	@Getter
+	private int hitsLanded;
+	@Getter
+	private int gatheredOre;
+	@Getter
+	private int gatheredBark;
+	@Getter
+	private int gatheredLinen;
+	@Getter
+	private int gatheredFrames;
+	@Getter
+	private int gatheredShards;
+	@Getter
+	private int gatheredFish;
+	@Getter
+	private boolean hasString;
+	@Getter
+	private boolean hasOrb;
+	@Getter
+	private boolean hasSpike;
+	@Getter
+	private boolean bossing;
+	@Getter
+	private boolean inside;
 
 	@Subscribe
 	public void onAnimationChanged(AnimationChanged animationChanged)
 	{
+		// Only need to listen when in the boss fight, all animation related info is only used there
+		if (!bossing) return;
+
 		Actor actor = animationChanged.getActor();
 		if (actor instanceof Player) {
 			Player player = (Player) actor;
@@ -116,7 +199,7 @@ public class GauntletBuddy extends Plugin
             }
 
 			// Logging line to identify animation IDs if DEBUG is true
-			if (DEBUG) client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Animation ID : " + animId, null);
+			if (DEBUG) client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Player Animation ID : " + animId, null);
 
 			// If the current animation is not an attack return early
 			if (currentAttack == AttackStyleType.NONE) {
@@ -154,51 +237,31 @@ public class GauntletBuddy extends Plugin
 					// Record hits that land as they cause the Hunllef to swap prayers
 					if (prayerStyle != currentAttack) {
 						hitsLanded += 1;
-						// After 5 hits the next will trigger a prayer swap so log a warning message and flash the screen
-						// TODO : Config options for this
-						if (hitsLanded == 5) {
-							client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "USE ALTERNATE ATTACK STYLE",
-									null);
-							triggerWarning();
-						} else if (hitsLanded == 6) {
+						// After 5 hits the next will trigger a prayer swap
+						if (hitsLanded == 6) {
 							// 6th hit will have rolled prayers over so reset the count and stop the warning flash
 							hitsLanded = 0;
-							haltWarning();
 						}
-						// Chat log line for the count of hits landed
-						client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Hits landed : " +
-								Integer.toString(hitsLanded), null);
 					}
 				}
 			}
-			// Handle Hunllef animations since it tells what attack style is going to be used
 		} else if (actor instanceof NPC) {
+			// Handle Hunllef animations since it tells what attack style is going to be used
 			// Make sure it's the Hunllef
 			NPC npc = (NPC) actor;
 			String npcName = npc.getName();
-
 			if (npcName.contains("Hunllef")) {
 				int animId = npc.getAnimation();
-				//8754 attack style changed
-				//8755 alternate attack style changed
-				// TODO : Map to the proper swap magic -> ranged or ranged -> magic for each anim ID
-				if (animId == 8754 || animId == 8755) {
-					if (prayStyle == AttackStyleType.RANGE) {
-						prayStyle = AttackStyleType.MAGIC;
-					} else {
-						prayStyle = AttackStyleType.RANGE;
-					}
-					prayerOverlay.setPrayer(prayStyle);
-					client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "PRAY : " + prayStyle, null);
+				//8754 attack style changed ranged -> magic
+				//8755 attack style changed magic -> ranged
+				if (animId == 8754) {
+					prayStyle = AttackStyleType.MAGIC;
+				} else if (animId == 8755) {
+					prayStyle = AttackStyleType.RANGE;
 				}
-				if (DEBUG) client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Animation ID : " + animId, null);
+				client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "PRAY : " + prayStyle, null);
+				if (DEBUG) client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Hunllef Animation ID : " + animId, null);
 			}
 		}
-	}
-
-	@Provides
-	GauntletBuddyConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(GauntletBuddyConfig.class);
 	}
 }

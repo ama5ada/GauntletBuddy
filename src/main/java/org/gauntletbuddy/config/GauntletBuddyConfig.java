@@ -1,12 +1,11 @@
 package org.gauntletbuddy.config;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.ConfigSection;
+import net.runelite.client.config.*;
 import org.gauntletbuddy.config.types.GearTierType;
 import org.gauntletbuddy.config.types.SpecificationModeType;
 import org.gauntletbuddy.config.types.TrackingModeType;
+
+import java.awt.*;
 
 
 @ConfigGroup("Gauntlet Buddy")
@@ -291,7 +290,7 @@ public interface GauntletBuddyConfig extends Config
 	String npcHighlights = "npcHighlights";
 
 	/**
-	 * Hunllef Config Section, holds config values for Hunleff fight utilities
+	 * Hunllef Config Section, holds config values for Hunllef fight utilities
 	 */
 	@ConfigSection(
 			name = "Hunllef Utilities",
@@ -300,6 +299,42 @@ public interface GauntletBuddyConfig extends Config
 			closedByDefault = true
 	)
 	String hunllefUtilities = "hunllefUtilities";
+
+	@ConfigItem(
+			keyName = "prayerHighlight",
+			name = "Prayer Highlight",
+			description = "Highlight the correct protection prayer for Hunllef",
+			position = 1,
+			section = "hunllefUtilities"
+	)
+	default boolean prayerHighlight() { return true; }
+
+	@ConfigItem(
+			keyName = "hunllefPrayerSwapAlert",
+			name = "Prayer Swap Alert",
+			description = "Make your screen flash when your next attack will change the Hunllef active prayer",
+			position = 2,
+			section = "hunllefUtilities"
+	)
+	default boolean hunllefPrayerSwapAlert() { return true; }
+
+	@ConfigItem(
+			keyName = "hunllefHitDisplay",
+			name = "Hunllef Hit Display",
+			description = "Show the number of hits left until the Hunllef swaps prayers",
+			position = 3,
+			section = "hunllefUtilities"
+	)
+	default boolean hunllefHitDisplay() { return true; }
+
+	@ConfigItem(
+			keyName = "hunllefHitCountMode",
+			name = "Hit Count Mode",
+			description = "Option to count up or down the successful hits on the Hunllef",
+			position = 4,
+			section = "hunllefUtilities"
+	)
+	default TrackingModeType hunllefHitCountMode() { return TrackingModeType.COUNTDOWN; }
 
 	/**
 	 * Misc Config Section, holds config values for uncategorized utilities
@@ -311,4 +346,68 @@ public interface GauntletBuddyConfig extends Config
 			closedByDefault = true
 	)
 	String miscUtilities = "miscUtilities";
+
+	@ConfigItem(
+			keyName = "debugList",
+			name = "Debug List",
+			description = "Show the list of private variables used by the plugin in the upper left",
+			position = 1,
+			section = "miscUtilities"
+	)
+	default boolean debugList() { return false; }
+
+	@ConfigItem(
+			keyName = "totalTimer",
+			name = "Total Time",
+			description = "Display a timer that counts up from entering The Gauntlet to track total kill time on screen",
+			position = 2,
+			section = "miscUtilities"
+	)
+	default boolean totalTimer() { return true; }
+
+	@ConfigItem(
+			keyName = "crystalReminder",
+			name = "Crystal Reminder",
+			description = "Display a chat reminder when you use the last teleport crystal in your inventory",
+			position = 3,
+			section = "miscUtilities"
+	)
+	default boolean crystalReminder() { return true; }
+
+	@ConfigItem(
+			keyName = "highlightStations",
+			name = "Highlight Stations",
+			description = "Outline starting room crafting stations to easily tell where they are from outside the room",
+			position = 4,
+			section = "miscUtilities"
+	)
+	default boolean highlightStations() { return false; }
+
+	@Alpha
+	@ConfigItem(
+			keyName = "highlightStationsColor",
+			name = "Station Color",
+			description = "Color for the outline of starting room stations",
+			position = 5,
+			section = "miscUtilities"
+	)
+	default Color highlightStationsColor()
+	{
+		return new Color(255, 0, 255, 100);
+	}
+
+	@Range( max = 4 )
+	@ConfigItem(
+			keyName = "highlightStationsWidth",
+			name = "Outline Width",
+			description = "Width for the outline of starting room stations",
+			position = 6,
+			section = "miscUtilities"
+	)
+	@Units(Units.PIXELS)
+	default int stationHighlightWidth()
+	{
+		return 2;
+	}
+
 }

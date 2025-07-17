@@ -5,50 +5,44 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
+import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.AttackStyleType;
 
 import javax.inject.Inject;
 import java.awt.*;
+import java.util.Map;
 
 public class PrayerOverlay extends Overlay
 {
+    private final GauntletBuddy plugin;
+    private final GauntletBuddyConfig config;
     private final Client client;
+    private final Map<AttackStyleType, Integer> prayToID = Map.of(
+            AttackStyleType.MAGIC , 21,
+            AttackStyleType.RANGE , 22);
+
     @Inject
-    public PrayerOverlay(Client client)
+    public PrayerOverlay(GauntletBuddy plugin, Client client, GauntletBuddyConfig config)
     {
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
+        this.plugin = plugin;
         this.client = client;
-    }
-
-    // Default to protect from missiles
-    private int prayerId = 22;
-
-    public void setPrayer(AttackStyleType newPrayer)
-    {
-        if (newPrayer == AttackStyleType.MAGIC)
-        {
-            // Protect from Magic prayer ID
-            prayerId = 21;
-        } else {
-            prayerId = 22;
-        }
+        this.config = config;
     }
 
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        Widget prayerGroupWidget = client.getWidget(541, prayerId);
+        if (!plugin.isInside() || !plugin.isBossing() || !config.prayerHighlight()) return null;
+
+        Widget prayerGroupWidget = client.getWidget(541, prayToID.get(plugin.getPrayStyle()));
         if (prayerGroupWidget != null)
         {
             Rectangle bounds = prayerGroupWidget.getBounds();
-            int x = bounds.x;
-            int y = bounds.y;
-            int width = bounds.width;
-            int height = bounds.height;
-            graphics.setColor(new Color(0, 255, 255, 80));
+            graphics.setColor(new Color(0, 255, 255, 100));
             graphics.setStroke(new BasicStroke(3.0f));
-            graphics.drawRect(x, y, width, height);
+            graphics.draw(bounds);
         }
         return null;
     }
