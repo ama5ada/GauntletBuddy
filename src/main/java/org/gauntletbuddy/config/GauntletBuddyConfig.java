@@ -2,6 +2,7 @@ package org.gauntletbuddy.config;
 
 import net.runelite.client.config.*;
 import org.gauntletbuddy.config.types.GearTierType;
+import org.gauntletbuddy.config.types.PrayerHighlightModeType;
 import org.gauntletbuddy.config.types.SpecificationModeType;
 import org.gauntletbuddy.config.types.TrackingModeType;
 
@@ -301,20 +302,22 @@ public interface GauntletBuddyConfig extends Config
 	String hunllefUtilities = "hunllefUtilities";
 
 	@ConfigItem(
-			keyName = "prayerHighlight",
-			name = "Prayer Highlight",
-			description = "Highlight the correct protection prayer for Hunllef",
+			keyName = "prayerHighlightMode",
+			name = "Prayer Highlight Mode",
+			description = "Different options for displaying the prayer highlight outline",
 			position = 1,
-			section = "hunllefUtilities"
+			section = hunllefUtilities
 	)
-	default boolean prayerHighlight() { return true; }
+	default PrayerHighlightModeType hunllefPrayerHighlightMode() {
+		return PrayerHighlightModeType.ALWAYS;
+	}
 
 	@ConfigItem(
 			keyName = "hunllefPrayerSwapAlert",
 			name = "Prayer Swap Alert",
 			description = "Make your screen flash when your next attack will change the Hunllef active prayer",
 			position = 2,
-			section = "hunllefUtilities"
+			section = hunllefUtilities
 	)
 	default boolean hunllefPrayerSwapAlert() { return true; }
 
@@ -323,7 +326,7 @@ public interface GauntletBuddyConfig extends Config
 			name = "Hunllef Hit Display",
 			description = "Show the number of hits left until the Hunllef swaps prayers",
 			position = 3,
-			section = "hunllefUtilities"
+			section = hunllefUtilities
 	)
 	default boolean hunllefHitDisplay() { return true; }
 
@@ -332,7 +335,7 @@ public interface GauntletBuddyConfig extends Config
 			name = "Hit Count Mode",
 			description = "Option to count up or down the successful hits on the Hunllef",
 			position = 4,
-			section = "hunllefUtilities"
+			section = hunllefUtilities
 	)
 	default TrackingModeType hunllefHitCountMode() { return TrackingModeType.COUNTDOWN; }
 
@@ -352,7 +355,7 @@ public interface GauntletBuddyConfig extends Config
 			name = "Debug List",
 			description = "Show the list of private variables used by the plugin in the upper left",
 			position = 1,
-			section = "miscUtilities"
+			section = miscUtilities
 	)
 	default boolean debugList() { return false; }
 
@@ -361,7 +364,7 @@ public interface GauntletBuddyConfig extends Config
 			name = "Total Time",
 			description = "Display a timer that counts up from entering The Gauntlet to track total kill time on screen",
 			position = 2,
-			section = "miscUtilities"
+			section = miscUtilities
 	)
 	default boolean totalTimer() { return true; }
 
@@ -370,7 +373,7 @@ public interface GauntletBuddyConfig extends Config
 			name = "Crystal Reminder",
 			description = "Display a chat reminder when you use the last teleport crystal in your inventory",
 			position = 3,
-			section = "miscUtilities"
+			section = miscUtilities
 	)
 	default boolean crystalReminder() { return true; }
 
@@ -379,7 +382,7 @@ public interface GauntletBuddyConfig extends Config
 			name = "Highlight Stations",
 			description = "Outline starting room crafting stations to easily tell where they are from outside the room",
 			position = 4,
-			section = "miscUtilities"
+			section = miscUtilities
 	)
 	default boolean highlightStations() { return false; }
 
@@ -389,7 +392,7 @@ public interface GauntletBuddyConfig extends Config
 			name = "Station Color",
 			description = "Color for the outline of starting room stations",
 			position = 5,
-			section = "miscUtilities"
+			section = miscUtilities
 	)
 	default Color highlightStationsColor()
 	{
@@ -402,7 +405,7 @@ public interface GauntletBuddyConfig extends Config
 			name = "Outline Width",
 			description = "Width for the outline of starting room stations",
 			position = 6,
-			section = "miscUtilities"
+			section = miscUtilities
 	)
 	@Units(Units.PIXELS)
 	default int stationHighlightWidth()
