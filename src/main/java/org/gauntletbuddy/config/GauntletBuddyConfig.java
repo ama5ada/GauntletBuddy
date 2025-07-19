@@ -24,13 +24,15 @@ public interface GauntletBuddyConfig extends Config
 	String itemTracking = "itemTracking";
 
 	@ConfigItem(
-			keyName = "trackItems",
-			name = "Track Items",
-			description = "Toggle whether to track desired items to gather",
+			keyName = "trackingMode",
+			name = "Tracking Mode",
+			description = "Select mode for tracking items, counting up to or down from goal",
 			section = itemTracking,
 			position = 1
 	)
-	default boolean trackItems() { return true; }
+	default TrackingModeType itemTrackingMode() {
+		return TrackingModeType.COUNTDOWN;
+	}
 
 	@ConfigItem(
 			keyName = "specificationMode",
@@ -44,24 +46,13 @@ public interface GauntletBuddyConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "trackingMode",
-			name = "Tracking Mode",
-			description = "Select mode for tracking items, counting up to or down from goal",
+			keyName = "hideCompleted",
+			name = "Hide Completed Items",
+			description = "Toggle for hiding item counters for items that you don't need more of",
 			section = itemTracking,
 			position = 3
 	)
-	default TrackingModeType itemTrackingMode() {
-		return TrackingModeType.COUNTDOWN;
-	}
-
-	@ConfigItem(
-			keyName = "hideAcquired",
-			name = "Hide Acquired Items",
-			description = "Toggle for hiding item counters for items that you don't need more of",
-			section = itemTracking,
-			position = 4
-	)
-	default boolean hideAcquired() { return true; }
+	default boolean hideCompleted() { return true; }
 
 	/**
 	 * Item Tracking manual input section, holds fields to specify item goals manually
@@ -322,22 +313,13 @@ public interface GauntletBuddyConfig extends Config
 	default boolean hunllefPrayerSwapAlert() { return true; }
 
 	@ConfigItem(
-			keyName = "hunllefHitDisplay",
-			name = "Hunllef Hit Display",
-			description = "Show the number of hits left until the Hunllef swaps prayers",
-			position = 3,
-			section = hunllefUtilities
-	)
-	default boolean hunllefHitDisplay() { return true; }
-
-	@ConfigItem(
-			keyName = "hunllefHitCountMode",
-			name = "Hit Count Mode",
-			description = "Option to count up or down the successful hits on the Hunllef",
+			keyName = "hunllefHitTrackerMode",
+			name = "Hunllef Hit Tracker",
+			description = "Option to count hits off prayer on Hunllef",
 			position = 4,
 			section = hunllefUtilities
 	)
-	default TrackingModeType hunllefHitCountMode() { return TrackingModeType.COUNTDOWN; }
+	default TrackingModeType hunllefHitTrackerMode() { return TrackingModeType.COUNTDOWN; }
 
 	/**
 	 * Misc Config Section, holds config values for uncategorized utilities

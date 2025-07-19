@@ -11,11 +11,9 @@ import org.gauntletbuddy.overlays.CounterOverlay;
 import org.gauntletbuddy.overlays.PrayerOverlay;
 import org.gauntletbuddy.overlays.WarningOverlay;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import static java.util.Objects.nonNull;
-
 
 @Singleton
 public final class HunllefModule implements PluginModule {
@@ -36,6 +34,15 @@ public final class HunllefModule implements PluginModule {
     public void start()
     {
         eventBus.register(this);
+
+        for (final NPC npc : client.getTopLevelWorldView().npcs())
+        {
+            if (npc != null) {
+                String npcName = npc.getName();
+                if (npcName != null && npcName.contains("Hunllef")) hunllef = npc;
+            }
+        }
+
         overlayManager.add(warningOverlay);
         overlayManager.add(prayerOverlay);
         overlayManager.add(counterOverlay);
@@ -45,6 +52,7 @@ public final class HunllefModule implements PluginModule {
     public void stop()
     {
         resetBossState();
+        hunllef = null;
         eventBus.unregister(this);
         overlayManager.remove(warningOverlay);
         overlayManager.remove(prayerOverlay);
@@ -61,6 +69,10 @@ public final class HunllefModule implements PluginModule {
     private AttackStyleType prayStyle = AttackStyleType.RANGE;
     @Getter
     private int hitsLanded;
+
+    @Nullable
+    @Getter
+    private NPC hunllef;
 
     @Subscribe
     public void onAnimationChanged(AnimationChanged animationChanged)
@@ -102,9 +114,7 @@ public final class HunllefModule implements PluginModule {
             }
 
             // If the current animation is not an attack return early
-            if (currentAttack == AttackStyleType.NONE) {
-                return;
-            }
+            if (currentAttack == AttackStyleType.NONE) return;
 
             // Now that we know the player was attacking check if we're hitting the Hunllef
             Actor target = player.getInteracting();
@@ -113,11 +123,11 @@ public final class HunllefModule implements PluginModule {
                 NPC npc = (NPC) target;
                 String npcName = npc.getName();
 
-                if (npcName.contains("Hunllef")) {
-                    int currentOverhead = npc.getOverheadSpriteIds()[0];
+                if (npcName != null && npcName.contains("Hunllef")) {
+                    short[] overHeadSprites = npc.getOverheadSpriteIds();
                     AttackStyleType prayerStyle = AttackStyleType.NONE;
-
-                    if (nonNull(currentOverhead)) {
+                    if (overHeadSprites != null) {
+                        int currentOverhead = overHeadSprites[0];
                         switch(currentOverhead) {
                             case 0:
                                 //melee prayer
@@ -150,7 +160,7 @@ public final class HunllefModule implements PluginModule {
             // Make sure it's the Hunllef
             NPC npc = (NPC) actor;
             String npcName = npc.getName();
-            if (npcName.contains("Hunllef")) {
+            if (npcName != null && npcName.contains("Hunllef")) {
                 int animId = npc.getAnimation();
                 //8754 attack style changed ranged -> magic
                 //8755 attack style changed magic -> ranged

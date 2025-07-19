@@ -14,10 +14,10 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.modules.GauntletModule;
 import org.gauntletbuddy.modules.HunllefModule;
+import org.gauntletbuddy.modules.ItemManager;
 import org.gauntletbuddy.overlays.DebugOverlay;
 
-import static net.runelite.api.gameval.VarbitID.GAUNTLET_BOSS_STARTED;
-import static net.runelite.api.gameval.VarbitID.GAUNTLET_START;
+import static net.runelite.api.gameval.VarbitID.*;
 
 @PluginDescriptor(
 		name = "Gauntlet Buddy",
@@ -48,6 +48,9 @@ public final class GauntletBuddy extends Plugin
 	@Inject
 	private DebugOverlay debugOverlay;
 
+	@Inject
+	private ItemManager itemManager;
+
 	@Override
 	protected void startUp()
 	{
@@ -67,6 +70,8 @@ public final class GauntletBuddy extends Plugin
 	private boolean bossing = false;
 	@Getter
 	private boolean inside = false;
+	@Getter
+	private boolean corrupted = false;
 
 	/**
 	 * Method to initialize all starting values on plugin load
@@ -84,9 +89,12 @@ public final class GauntletBuddy extends Plugin
 		{
 			inside = client.getVarbitValue(GAUNTLET_START) != 0;
 			if (!inside) {
+				bossing = false;
+				corrupted = false;
 				gauntletModule.stop();
 				hunllefModule.stop();
 			} else {
+				corrupted = client.getVarbitValue(GAUNTLET_CORRUPTED) != 0;
 				gauntletModule.start();
 			}
 		}

@@ -34,24 +34,21 @@ public class CounterOverlay extends Overlay {
     @Override
     public Dimension render(final Graphics2D graphics)
     {
-        if (!config.hunllefHitDisplay()) return null;
-        WorldView worldView = client.getTopLevelWorldView();
+        if (config.hunllefHitTrackerMode() == TrackingModeType.OFF) return null;
 
-        for (NPC npc : worldView.npcs())
+        NPC hunllef = hunllefModule.getHunllef();
+        int displayHits = hunllefModule.getHitsLanded();
+
+        if (config.hunllefHitTrackerMode() == TrackingModeType.COUNTDOWN) displayHits = 5 - displayHits;
+        String counterString = Integer.toString(displayHits);
+        Point textLoc = hunllef.getCanvasTextLocation(graphics, counterString, 0);
+        if (textLoc != null)
         {
-            if (npc == null || npc.getName() == null) continue;
-            if (!npc.getName().contains("Hunllef")) continue;
-            int displayHits = hunllefModule.getHitsLanded();
-            if (config.hunllefHitCountMode() == TrackingModeType.COUNTDOWN) displayHits = 5 - displayHits;
-            String counterString = Integer.toString(displayHits);
-            Point textLoc = npc.getCanvasTextLocation(graphics, counterString, 0);
-            if (textLoc != null)
-            {
-                graphics.setFont(new Font("Arial", Font.BOLD, 16));
-                graphics.setColor(Color.YELLOW);
-                graphics.drawString(counterString, textLoc.getX(), textLoc.getY());
-            }
+            graphics.setFont(new Font("Arial", Font.BOLD, 16));
+            graphics.setColor(Color.YELLOW);
+            graphics.drawString(counterString, textLoc.getX(), textLoc.getY());
         }
+
         return null;
     }
 }

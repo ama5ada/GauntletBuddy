@@ -10,6 +10,7 @@ import org.gauntletbuddy.GauntletBuddy;
 import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.AttackStyleType;
 import org.gauntletbuddy.modules.HunllefModule;
+import org.gauntletbuddy.modules.ItemManager;
 
 import java.util.LinkedHashMap;
 
@@ -24,17 +25,20 @@ public class DebugOverlay extends Overlay
     private final GauntletBuddy plugin;
     private final HunllefModule hunllefModule;
     private final GauntletBuddyConfig config;
+    private final ItemManager itemManager;
     private final Client client;
     private final Map<AttackStyleType, Integer> prayToID = Map.of(
             AttackStyleType.MAGIC , 21,
             AttackStyleType.RANGE , 22);
 
     @Inject
-    public DebugOverlay(final GauntletBuddy plugin, final Client client, final GauntletBuddyConfig config, final HunllefModule hunllefModule)
+    public DebugOverlay(final GauntletBuddy plugin, final Client client, final GauntletBuddyConfig config,
+                        final HunllefModule hunllefModule, final ItemManager itemManager)
     {
         setPosition(OverlayPosition.TOP_LEFT);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
         this.hunllefModule = hunllefModule;
+        this.itemManager = itemManager;
         this.plugin = plugin;
         this.client = client;
         this.config = config;
@@ -48,8 +52,14 @@ public class DebugOverlay extends Overlay
 
         fieldValues.put("Inside", plugin.isInside());
         fieldValues.put("Bossing", plugin.isBossing());
+        fieldValues.put("Corrupted", plugin.isCorrupted());
         fieldValues.put("Player Prayer Style", hunllefModule.getPrayStyle());
         fieldValues.put("Hits Landed on Hunllef", hunllefModule.getHitsLanded());
+
+        for (String resource : ItemManager.getResources())
+        {
+            fieldValues.put(resource, ItemManager.getResourceCount(resource));
+        }
 
         graphics.setFont(new Font("Arial", Font.PLAIN, 12));
         int y = 15;
