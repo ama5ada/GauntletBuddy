@@ -9,6 +9,7 @@ import net.runelite.client.ui.overlay.OverlayUtil;
 import org.gauntletbuddy.GauntletBuddy;
 import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.AttackStyleType;
+import org.gauntletbuddy.config.types.GauntletItem;
 import org.gauntletbuddy.modules.HunllefModule;
 import org.gauntletbuddy.modules.ItemManager;
 
@@ -51,14 +52,21 @@ public class DebugOverlay extends Overlay
         LinkedHashMap<String, Object> fieldValues = new LinkedHashMap<>();
 
         fieldValues.put("Inside", plugin.isInside());
-        fieldValues.put("Bossing", plugin.isBossing());
-        fieldValues.put("Corrupted", plugin.isCorrupted());
-        fieldValues.put("Player Prayer Style", hunllefModule.getPrayStyle());
-        fieldValues.put("Hits Landed on Hunllef", hunllefModule.getHitsLanded());
 
-        for (String resource : ItemManager.getResources())
+        if (plugin.isInside())
         {
-            fieldValues.put(resource, ItemManager.getResourceCount(resource));
+            fieldValues.put("Bossing", plugin.isBossing());
+            fieldValues.put("Corrupted", plugin.isCorrupted());
+            for (GauntletItem item : GauntletItem.getGAUNTLET_ITEMS())
+            {
+                fieldValues.put(item.toString(), ItemManager.getResourceCount(item));
+            }
+        }
+
+        if (plugin.isBossing())
+        {
+            fieldValues.put("Player Prayer Style", hunllefModule.getPrayStyle());
+            fieldValues.put("Hits Landed on Hunllef", hunllefModule.getHitsLanded());
         }
 
         graphics.setFont(new Font("Arial", Font.PLAIN, 12));

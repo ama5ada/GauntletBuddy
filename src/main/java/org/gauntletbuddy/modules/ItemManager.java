@@ -3,74 +3,36 @@ package org.gauntletbuddy.modules;
 import lombok.Getter;
 import lombok.Setter;
 import org.gauntletbuddy.config.GauntletBuddyConfig;
+import org.gauntletbuddy.config.types.GauntletItem;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import net.runelite.api.gameval.ItemID;
-
-import static java.util.Map.entry;
+import java.util.*;
 
 @Singleton
 public class ItemManager {
     @Inject
     private GauntletBuddyConfig config;
-    @Getter
-    private static final List<String> resources = Arrays.asList("Ore", "Bark", "Linum", "Grym Leaf", "Weapon Frame",
-            "Paddlefish", "Shards", "Bow String", "Orb", "Spike");
-    private static final Map<String, GatheredResource> gatheredResourceMap = new HashMap<>();
-    private static int Linum = ItemID.GAUNTLET_TELEPORT_CRYSTAL_HM;
-    //TODO Convert resources to enums
-    @Getter
-    private static final Map<Integer, String> idToResource = Map.ofEntries(
-            entry(ItemID.GAUNTLET_CRYSTAL_SHARD_HM, "Shards"),
-            entry(ItemID.GAUNTLET_CRYSTAL_SHARD_HM_2, "Shards"),
-            entry(ItemID.GAUNTLET_CRYSTAL_SHARD_HM_3, "Shards"),
-            entry(ItemID.GAUNTLET_CRYSTAL_SHARD_HM_4, "Shards"),
-            entry(ItemID.GAUNTLET_CRYSTAL_SHARD_HM_5, "Shards"),
-            entry(ItemID.GAUNTLET_CRYSTAL_SHARD_HM_25, "Shards"),
-            entry(ItemID.GAUNTLET_CRYSTAL_SHARD, "Shards"),
-            entry(ItemID.GAUNTLET_MELEE_COMPONENT_HM, "Spike"),
-            entry(ItemID.GAUNTLET_MELEE_COMPONENT, "Spike"),
-            entry(ItemID.GAUNTLET_RANGED_COMPONENT_HM, "Bow String"),
-            entry(ItemID.GAUNTLET_RANGED_COMPONENT, "Bow String"),
-            entry(ItemID.GAUNTLET_MAGIC_COMPONENT_HM, "Orb"),
-            entry(ItemID.GAUNTLET_MAGIC_COMPONENT, "Orb"),
-            entry(ItemID.GAUNTLET_HERB_HM, "Grym Leaf"),
-            entry(ItemID.GAUNTLET_HERB, "Grym Leaf"),
-            entry(ItemID.GAUNTLET_RAW_FOOD, "Paddlefish"),
-            entry(ItemID.GAUNTLET_GENERIC_COMPONENT_HM, "Weapon Frame"),
-            entry(ItemID.GAUNTLET_GENERIC_COMPONENT, "Weapon Frame"),
-            entry(ItemID.GAUNTLET_ORE_HM, "Ore"),
-            entry(ItemID.GAUNTLET_ORE, "Ore"),
-            entry(ItemID.GAUNTLET_BARK_HM, "Bark"),
-            entry(ItemID.GAUNTLET_BARK, "Bark"),
-            entry(ItemID.GAUNTLET_FIBRE_HM, "Linum"),
-            entry(ItemID.GAUNTLET_FIBRE, "Linum")
-    );
+    private static final EnumMap<GauntletItem, GatheredResource> gatheredResourceMap = new EnumMap<>(GauntletItem.class);
 
-    public static int getResourceCount(String resource) {
-        if (gatheredResourceMap.containsKey(resource)) return gatheredResourceMap.get(resource).getCount();
-        return 0;
+    public static int getResourceCount(GauntletItem item) {
+        return gatheredResourceMap.get(item).getCount();
     }
 
-    public static void updateResourceCount(String resource, int count) {
-        gatheredResourceMap.get(resource).updateCount(count);
+    public static void updateResourceCount(GauntletItem item, int count) {
+        gatheredResourceMap.get(item).updateCount(count);
     }
 
     public void init() {
-        for (String resource : resources) {
-            GatheredResource gathered = new GatheredResource(resource);
-            gatheredResourceMap.put(resource, gathered);
+        for (GauntletItem item : GauntletItem.getGAUNTLET_ITEMS()) {
+            GatheredResource gathered = new GatheredResource(item);
+            gatheredResourceMap.put(item, gathered);
         }
     }
 
     public void reset() {
-        for (String resource : resources) {
-            gatheredResourceMap.get(resource).setCount(0);
+        for (GauntletItem item : GauntletItem.getGAUNTLET_ITEMS()) {
+            gatheredResourceMap.get(item).setCount(0);
         }
     }
 
@@ -78,10 +40,10 @@ public class ItemManager {
     private static class GatheredResource {
         @Setter
         private int count = 0;
-        private final String itemName;
+        private final GauntletItem item;
 
-        private GatheredResource(String resource) {
-            this.itemName = resource;
+        private GatheredResource(GauntletItem item) {
+            this.item = item;
         }
 
         public void updateCount(final int count) {

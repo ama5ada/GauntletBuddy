@@ -7,11 +7,11 @@ import net.runelite.api.ItemContainer;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import org.gauntletbuddy.config.types.GauntletItem;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Singleton
@@ -24,7 +24,6 @@ public final class GauntletModule implements PluginModule {
     private ItemManager itemManager;
 
     private HashMap<Integer, Integer> inventoryCounts = new HashMap<>();
-    private List<String> resources = ItemManager.getResources();
 
     @Override
     public void start()
@@ -54,10 +53,10 @@ public final class GauntletModule implements PluginModule {
             for (Map.Entry<Integer, Integer> entry : updatedInventoryCounts.entrySet()) {
                 int itemId = entry.getKey();
                 int itemCount = entry.getValue();
-                if (ItemManager.getIdToResource().containsKey(itemId)) {
+                GauntletItem.itemFromId(itemId).ifPresent(item -> {
                     int diff = itemCount - inventoryCounts.getOrDefault(itemId, 0);
-                    ItemManager.updateResourceCount(ItemManager.getIdToResource().get(itemId), diff);
-                }
+                    ItemManager.updateResourceCount(item, diff);
+                });
             }
             inventoryCounts = updatedInventoryCounts;
         }
