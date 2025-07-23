@@ -87,13 +87,21 @@ public final class GauntletBuddy extends Plugin
 	{
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
 		{
-			inside = client.getVarbitValue(GAUNTLET_START) != 0;
-			if (!inside) {
-				bossing = false;
-				corrupted = false;
-				gauntletModule.stop();
-				hunllefModule.stop();
-			} else {
+			boolean current_status = client.getVarbitValue(GAUNTLET_START) != 0;
+			if (inside)
+			{
+				// If marked as inside but current_status is false (now outside)
+				if (!current_status)
+				{
+					bossing = false;
+					inside = false;
+					corrupted = false;
+					gauntletModule.stop();
+					hunllefModule.stop();
+				}
+			} else if (current_status) {
+				// If not marked as inside but current_status is true (now inside) start plugins
+				inside = true;
 				corrupted = client.getVarbitValue(GAUNTLET_CORRUPTED) != 0;
 				gauntletModule.start();
 			}
