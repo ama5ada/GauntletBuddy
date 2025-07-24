@@ -52,10 +52,10 @@ public class DebugOverlay extends Overlay
         LinkedHashMap<String, Object> fieldValues = new LinkedHashMap<>();
 
         fieldValues.put("Inside", plugin.isInside());
+        fieldValues.put("Bossing", plugin.isBossing());
 
-        if (plugin.isInside())
+        if (plugin.isInside() && !plugin.isBossing())
         {
-            fieldValues.put("Bossing", plugin.isBossing());
             fieldValues.put("Corrupted", plugin.isCorrupted());
             for (GauntletItem item : GauntletItem.getGAUNTLET_ITEMS())
             {
@@ -67,6 +67,8 @@ public class DebugOverlay extends Overlay
         {
             fieldValues.put("Player Prayer Style", hunllefModule.getPrayStyle());
             fieldValues.put("Hits Landed on Hunllef", hunllefModule.getHitsLanded());
+            fieldValues.put("Current Hunllef Prayer", hunllefModule.getCurrentHunllefPrayer());
+            fieldValues.put("Previous Hunllef Prayer", hunllefModule.getPreviousHunllefPrayer());
         }
 
         graphics.setFont(new Font("Arial", Font.PLAIN, 12));

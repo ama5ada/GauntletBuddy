@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import lombok.Getter;
 import net.runelite.api.*;
 import net.runelite.api.events.*;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -29,6 +30,9 @@ public final class GauntletBuddy extends Plugin
 {
 	@Inject
 	private Client client;
+
+	@Inject
+	private ClientThread clientThread;
 
 	@Provides
 	GauntletBuddyConfig provideConfig(ConfigManager configManager)
@@ -56,6 +60,27 @@ public final class GauntletBuddy extends Plugin
 	{
 		initVars();
 		overlayManager.add(debugOverlay);
+
+		// Do not check if the player is inside if the plugin doesn't start while the player is logged in
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			return;
+		}
+
+		clientThread.invoke(() -> {
+			if (client.getVarbitValue(GAUNTLET_BOSS_STARTED) != 0)
+			{
+				inside = true;
+				bossing = true;
+				hunllefModule.start();
+			}
+			else if (client.getVarbitValue(GAUNTLET_START) != 0)
+			{
+				inside = true;
+				corrupted = client.getVarbitValue(GAUNTLET_CORRUPTED) != 0;
+				gauntletModule.start();
+			}
+		});
 	}
 
 	@Override
@@ -85,26 +110,23 @@ public final class GauntletBuddy extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+		boolean current_status = client.getVarbitValue(GAUNTLET_START) != 0;
+		if (inside)
 		{
-			boolean current_status = client.getVarbitValue(GAUNTLET_START) != 0;
-			if (inside)
+			// If marked as inside but current_status is false (now outside)
+			if (!current_status)
 			{
-				// If marked as inside but current_status is false (now outside)
-				if (!current_status)
-				{
-					bossing = false;
-					inside = false;
-					corrupted = false;
-					gauntletModule.stop();
-					hunllefModule.stop();
-				}
-			} else if (current_status) {
-				// If not marked as inside but current_status is true (now inside) start plugins
-				inside = true;
-				corrupted = client.getVarbitValue(GAUNTLET_CORRUPTED) != 0;
-				gauntletModule.start();
+				bossing = false;
+				inside = false;
+				corrupted = false;
+				gauntletModule.stop();
+				hunllefModule.stop();
 			}
+		} else if (current_status) {
+			// If not marked as inside but current_status is true (now inside) start plugins
+			inside = true;
+			corrupted = client.getVarbitValue(GAUNTLET_CORRUPTED) != 0;
+			gauntletModule.start();
 		}
 	}
 

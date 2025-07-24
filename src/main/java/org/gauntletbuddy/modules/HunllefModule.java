@@ -46,6 +46,11 @@ public final class HunllefModule implements PluginModule {
         overlayManager.add(warningOverlay);
         overlayManager.add(prayerOverlay);
         overlayManager.add(counterOverlay);
+
+        if (hunllef != null) {
+            currentHunllefPrayer = getHunllefPrayerStyle(hunllef);
+            previousHunllefPrayer = getHunllefPrayerStyle(hunllef);
+        }
     }
 
     @Override
@@ -69,6 +74,10 @@ public final class HunllefModule implements PluginModule {
     private AttackStyleType prayStyle = AttackStyleType.RANGE;
     @Getter
     private int hitsLanded;
+    @Getter
+    private AttackStyleType previousHunllefPrayer = AttackStyleType.NONE;
+    @Getter
+    private AttackStyleType currentHunllefPrayer = AttackStyleType.NONE;
 
     @Nullable
     @Getter
@@ -124,28 +133,16 @@ public final class HunllefModule implements PluginModule {
                 String npcName = npc.getName();
 
                 if (npcName != null && npcName.contains("Hunllef")) {
-                    short[] overHeadSprites = npc.getOverheadSpriteIds();
-                    AttackStyleType prayerStyle = AttackStyleType.NONE;
-                    if (overHeadSprites != null) {
-                        int currentOverhead = overHeadSprites[0];
-                        switch(currentOverhead) {
-                            case 0:
-                                //melee prayer
-                                prayerStyle = AttackStyleType.MELEE;
-                                break;
-                            case 1:
-                                //range prayer
-                                prayerStyle = AttackStyleType.RANGE;
-                                break;
-                            case 2:
-                                //mage prayer
-                                prayerStyle = AttackStyleType.MAGIC;
-                                break;
-                        }
+                    currentHunllefPrayer = getHunllefPrayerStyle(npc);
+
+                    // Fail-safe in case the plugin starts up when the player is already bossing this syncs the
+                    // Consecutive hits made on the Hunllef
+                    if (previousHunllefPrayer != currentHunllefPrayer) {
+                        hitsLanded = 0;
                     }
 
                     // Record hits that land as they cause the Hunllef to swap prayers
-                    if (prayerStyle != currentAttack) {
+                    if (currentHunllefPrayer != currentAttack) {
                         hitsLanded += 1;
                         // After 5 hits the next will trigger a prayer swap
                         if (hitsLanded == 6) {
@@ -153,6 +150,8 @@ public final class HunllefModule implements PluginModule {
                             hitsLanded = 0;
                         }
                     }
+
+                    previousHunllefPrayer = currentHunllefPrayer;
                 }
             }
         } else if (actor instanceof NPC) {
@@ -169,8 +168,30 @@ public final class HunllefModule implements PluginModule {
                 } else if (animId == 8755) {
                     prayStyle = AttackStyleType.RANGE;
                 }
-                //if (DEBUG) client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Hunllef Animation ID : " + animId, null);
             }
         }
+    }
+
+    private AttackStyleType getHunllefPrayerStyle(NPC npc) {
+        short[] overHeadSprites = npc.getOverheadSpriteIds();
+        AttackStyleType currentPrayer = AttackStyleType.NONE;
+        if (overHeadSprites != null) {
+            int currentOverhead = overHeadSprites[0];
+            switch(currentOverhead) {
+                case 0:
+                    //melee prayer
+                    currentPrayer = AttackStyleType.MELEE;
+                    break;
+                case 1:
+                    //range prayer
+                    currentPrayer = AttackStyleType.RANGE;
+                    break;
+                case 2:
+                    //mage prayer
+                    currentPrayer = AttackStyleType.MAGIC;
+                    break;
+            }
+        }
+        return currentPrayer;
     }
 }
