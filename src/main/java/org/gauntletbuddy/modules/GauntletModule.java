@@ -35,6 +35,7 @@ public final class GauntletModule implements PluginModule {
         }
         eventBus.register(this);
     }
+
     @Override
     public void stop()
     {
@@ -42,8 +43,13 @@ public final class GauntletModule implements PluginModule {
         itemManager.reset();
         inventoryCounts.clear();
     }
+
+    //TODO Better item tracking overlay, resource highlighting, resource minimap icons
+
     @Subscribe
     public void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
+        //TODO Skip most calculations in the spawn room since people frequently bank items there and crafting occurs there
+        // Exception to this rule is crafting teleport crystals which should add shards to the required total
         HashMap<Integer, Integer> updatedInventoryCounts = new HashMap<>();
         if (itemContainerChanged.getContainerId() == InventoryID.INVENTORY.getId()) {
             ItemContainer inventory = itemContainerChanged.getItemContainer();

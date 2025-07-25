@@ -83,6 +83,8 @@ public final class HunllefModule implements PluginModule {
     @Getter
     private NPC hunllef;
 
+    //TODO Add highlighting for hunllef hitbox and tornadoes
+
     @Subscribe
     public void onAnimationChanged(AnimationChanged animationChanged)
     {

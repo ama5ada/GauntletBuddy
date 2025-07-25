@@ -46,6 +46,8 @@ public final class GauntletBuddy extends Plugin
 	@Inject
 	private GauntletModule gauntletModule;
 
+	//TODO Total time in gauntlet overlay
+
 	@Inject
 	private OverlayManager overlayManager;
 

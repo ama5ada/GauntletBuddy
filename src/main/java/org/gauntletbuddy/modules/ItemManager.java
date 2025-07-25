@@ -13,7 +13,9 @@ import java.util.*;
 public class ItemManager {
     @Inject
     private GauntletBuddyConfig config;
-    private static final EnumMap<GauntletItem, GatheredResource> gatheredResourceMap = new EnumMap<>(GauntletItem.class);
+    private static final EnumMap<GauntletItem, Resource> gatheredResourceMap = new EnumMap<>(GauntletItem.class);
+    //TODO Load resources from config in manual and calculated mode
+    private static final EnumMap<GauntletItem, Resource> requiredResourceMap = new EnumMap<>(GauntletItem.class);
 
     public static int getResourceCount(GauntletItem item) {
         return gatheredResourceMap.get(item).getCount();
@@ -25,7 +27,7 @@ public class ItemManager {
 
     public void init() {
         for (GauntletItem item : GauntletItem.getGAUNTLET_ITEMS()) {
-            GatheredResource gathered = new GatheredResource(item);
+            Resource gathered = new Resource(item);
             gatheredResourceMap.put(item, gathered);
         }
     }
@@ -37,12 +39,12 @@ public class ItemManager {
     }
 
     @Getter
-    private static class GatheredResource {
+    private static class Resource {
         @Setter
         private int count = 0;
         private final GauntletItem item;
 
-        private GatheredResource(GauntletItem item) {
+        private Resource(GauntletItem item) {
             this.item = item;
         }
 
