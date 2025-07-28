@@ -49,15 +49,23 @@ public class PrayerOverlay extends Overlay
         {
             // IN_TAB mode means that when the prayer tab is closed the highlight should not show
             if (config.hunllefPrayerHighlightMode() == PrayerHighlightModeType.IN_TAB && prayerGroupWidget.isHidden()) return null;
+
+            AttackStyleType playerPrayer = AttackStyleType.NONE;
+
+            if (client.getVarbitValue(PRAYER_PROTECTFROMMAGIC) == 1) playerPrayer = AttackStyleType.MAGIC;
+            if (client.getVarbitValue(PRAYER_PROTECTFROMMISSILES) == 1) playerPrayer = AttackStyleType.RANGE;
+
+            Boolean correctPrayer = playerPrayer == hunllefModule.getPrayStyle();
+
             // MISMATCH mode means that the highlight should only appear when the players set prayer is not correct
-            if (config.hunllefPrayerHighlightMode() == PrayerHighlightModeType.MISMATCH) {
-                if (client.getVarbitValue(PRAYER_PROTECTFROMMAGIC) == 1 &&
-                        hunllefModule.getPrayStyle() == AttackStyleType.MAGIC) return null;
-                if (client.getVarbitValue(PRAYER_PROTECTFROMMISSILES) == 1 &&
-                        hunllefModule.getPrayStyle() == AttackStyleType.RANGE) return null;
-            }
+            if (config.hunllefPrayerHighlightMode() == PrayerHighlightModeType.MISMATCH && correctPrayer) return null;
+
+            Color drawColor = config.prayerMismatchHighlightColor();
+
+            if (correctPrayer) drawColor = config.prayerHighlightColor();
+
             Rectangle bounds = prayerGroupWidget.getBounds();
-            graphics.setColor(new Color(0, 255, 255, 100));
+            graphics.setColor(drawColor);
             graphics.setStroke(new BasicStroke(3.0f));
             graphics.draw(bounds);
         }

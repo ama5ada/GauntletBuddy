@@ -304,10 +304,34 @@ public interface GauntletBuddyConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "hunllefPrayerSwapAlert",
-			name = "Prayer Swap Alert",
-			description = "Make your screen flash when your next attack will change the Hunllef active prayer",
+			keyName = "prayerHighlightColor",
+			name = "Prayer Highlight Color",
+			description = "Change color of prayer highlight box",
 			position = 2,
+			section = hunllefUtilities
+	)
+	default Color prayerHighlightColor()
+	{
+		return new Color(0, 255, 100, 100);
+	}
+
+	@ConfigItem(
+			keyName = "prayerMismatchHighlightColor",
+			name = "Prayer MismatchColor",
+			description = "Change the color of your prayer highlight when your current overhead is wrong",
+			position = 3,
+			section = hunllefUtilities
+	)
+	default Color prayerMismatchHighlightColor()
+	{
+		return new Color(255, 200, 0, 100);
+	}
+
+	@ConfigItem(
+			keyName = "hunllefPrayerSwapAlert",
+			name = "Hunllef Prayer Swap Alert",
+			description = "Make your screen flash when your next attack will change the Hunllef active prayer",
+			position = 4,
 			section = hunllefUtilities
 	)
 	default boolean hunllefPrayerSwapAlert() { return true; }
@@ -316,7 +340,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "hunllefHitTrackerMode",
 			name = "Hunllef Hit Tracker",
 			description = "Option to count hits off prayer on Hunllef",
-			position = 4,
+			position = 5,
 			section = hunllefUtilities
 	)
 	default TrackingModeType hunllefHitTrackerMode() { return TrackingModeType.COUNTDOWN; }
