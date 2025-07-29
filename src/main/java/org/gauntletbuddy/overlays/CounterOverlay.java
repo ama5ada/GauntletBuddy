@@ -37,11 +37,14 @@ public class CounterOverlay extends Overlay {
         if (config.hunllefHitTrackerMode() == TrackingModeType.OFF) return null;
 
         NPC hunllef = hunllefModule.getHunllef();
-        int displayHits = hunllefModule.getHitsLanded();
+        if (hunllef == null || hunllef.isDead()) return null;
 
+        int displayHits = hunllefModule.getHitsLanded();
         if (config.hunllefHitTrackerMode() == TrackingModeType.COUNTDOWN) displayHits = 5 - displayHits;
         String counterString = Integer.toString(displayHits);
+
         Point textLoc = hunllef.getCanvasTextLocation(graphics, counterString, 0);
+
         if (textLoc != null)
         {
             graphics.setFont(new Font("Arial", Font.BOLD, 16));
