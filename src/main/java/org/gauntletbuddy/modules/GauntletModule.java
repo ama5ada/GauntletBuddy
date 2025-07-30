@@ -24,6 +24,7 @@ public final class GauntletModule implements PluginModule {
     private ItemManager itemManager;
 
     private HashMap<Integer, Integer> inventoryCounts = new HashMap<>();
+    private HashMap<Integer, Integer> equipmentCounts = new HashMap<>();
 
     @Override
     public void start()
@@ -50,21 +51,58 @@ public final class GauntletModule implements PluginModule {
     public void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
         //TODO Skip most calculations in the spawn room since people frequently bank items there and crafting occurs there
         // Exception to this rule is crafting teleport crystals which should add shards to the required total
-        HashMap<Integer, Integer> updatedInventoryCounts = new HashMap<>();
         if (itemContainerChanged.getContainerId() == InventoryID.INVENTORY.getId()) {
-            ItemContainer inventory = itemContainerChanged.getItemContainer();
-            for (Item item : inventory.getItems()) {
-                updatedInventoryCounts.put(item.getId(), updatedInventoryCounts.getOrDefault(item.getId(), 0) + item.getQuantity());
-            }
-            for (Map.Entry<Integer, Integer> entry : updatedInventoryCounts.entrySet()) {
+            inventoryCounts = updateItemCounts(inventoryCounts, itemContainerChanged.getItemContainer());
+        } else if (itemContainerChanged.getContainerId() == InventoryID.EQUIPMENT.getId()) {
+            equipmentCounts = updateItemCounts(equipmentCounts, itemContainerChanged.getItemContainer());
+        }
+    }
+
+    private HashMap<Integer, Integer> updateItemCounts(HashMap<Integer, Integer> targetMap, ItemContainer changed) {
+        HashMap<Integer, Integer> updatedCounts = new HashMap<>();
+
+        for (Item item : changed.getItems()) {
+            updatedCounts.put(item.getId(), updatedCounts.getOrDefault(item.getId(), 0) + item.getQuantity());
+        }
+
+        for (Map.Entry<Integer, Integer> entry : updatedCounts.entrySet()) {
+            int itemId = entry.getKey();
+            int itemCount = entry.getValue();
+            GauntletItem.itemFromId(itemId).ifPresent(item -> {
+                int diff = itemCount;
+
+                if (targetMap.containsKey(itemId)) {
+                    diff -= targetMap.get(itemId);
+                    targetMap.remove(itemId);
+                }
+
+                if (item.isCraftable() && item != GauntletItem.TELEPORT_CRYSTAL) refundComponents(item, diff);
+                ItemManager.updateResourceCount(item, diff);
+            });
+        }
+
+        if (!targetMap.isEmpty()) {
+            for (Map.Entry<Integer, Integer> entry : targetMap.entrySet()) {
                 int itemId = entry.getKey();
-                int itemCount = entry.getValue();
-                GauntletItem.itemFromId(itemId).ifPresent(item -> {
-                    int diff = itemCount - inventoryCounts.getOrDefault(itemId, 0);
+                int diff = -entry.getValue();
+                GauntletItem.itemFromId(itemId).ifPresent( item -> {
+                    if (item.isCraftable() && item != GauntletItem.TELEPORT_CRYSTAL) refundComponents(item, diff);
                     ItemManager.updateResourceCount(item, diff);
                 });
             }
-            inventoryCounts = updatedInventoryCounts;
+        }
+
+        return updatedCounts;
+    }
+
+    private void refundComponents(GauntletItem parent, int diff) {
+        Map<GauntletItem, Integer> itemComponents = parent.getComponents();
+        System.out.println(parent);
+        System.out.println(diff);
+        for (Map.Entry<GauntletItem, Integer>entry : itemComponents.entrySet()) {
+            GauntletItem component = entry.getKey();
+            int componentCount = entry.getValue();
+            ItemManager.updateResourceCount(component, componentCount * diff);
         }
     }
 }
