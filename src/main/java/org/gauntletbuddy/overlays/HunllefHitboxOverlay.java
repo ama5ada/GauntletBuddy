@@ -1,0 +1,116 @@
+package org.gauntletbuddy.overlays;
+
+import net.runelite.api.*;
+import net.runelite.api.Point;
+import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.ui.overlay.*;
+import org.gauntletbuddy.config.GauntletBuddyConfig;
+import org.gauntletbuddy.config.types.TornadoHighlightType;
+import org.gauntletbuddy.modules.HunllefModule;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.awt.*;
+import java.awt.geom.Arc2D;
+
+@Singleton
+public class HunllefHitboxOverlay extends Overlay {
+    private final Client client;
+    private final GauntletBuddyConfig config;
+    private final HunllefModule hunllefModule;
+    private final long TORNADO_DURATION = 12000;
+    private final int TIMER_RADIUS = 15;
+
+    @Inject
+    public HunllefHitboxOverlay(final Client client, final GauntletBuddyConfig config,
+                                final HunllefModule hunllefModule)
+    {
+        this.client = client;
+        this.config = config;
+        this.hunllefModule = hunllefModule;
+
+        setPosition(OverlayPosition.DYNAMIC);
+        setLayer(OverlayLayer.UNDER_WIDGETS);
+    }
+
+    @Override
+    public Dimension render(final Graphics2D graphics) {
+        renderTornadoes(graphics);
+        renderHunleffBox(graphics);
+        return null;
+    }
+
+    private void renderHunleffBox(final Graphics2D graphics) {
+
+    }
+
+    private void renderTornadoes(final Graphics2D graphics) {
+        if (config.tornadoHighlightType() == TornadoHighlightType.OFF || hunllefModule.getTornadoList().isEmpty()) return;
+
+        final boolean tileMode = config.tornadoHighlightType() == TornadoHighlightType.TRUE_TILE;
+        final boolean showTimer = config.tornadoTimer();
+
+        final Color tornadoHighlightColor = config.tornadoHighlightColor();
+        final Color tornadoFillColor = new Color(tornadoHighlightColor.getRed(), tornadoHighlightColor.getGreen(), tornadoHighlightColor.getBlue(), 30);
+        final Color tornadoTimerColor = config.tornadoTimerColor();
+        final Color timerFillColor = new Color(tornadoTimerColor.getRed(), tornadoTimerColor.getGreen(), tornadoTimerColor.getBlue(), 30);
+        final BasicStroke tornadoStroke = new BasicStroke(config.tornadoOutlineWidth());
+
+        final int worldPlane = client.getLocalPlayer().getWorldLocation().getPlane();
+
+        double timerAngle = 0;
+
+        if (config.tornadoTimer()) {
+            timerAngle = 360 * Math.max(0, 1.0 - (double) (System.currentTimeMillis() - hunllefModule.getTornadoSpawned()) / TORNADO_DURATION);
+        }
+
+        for (final NPC tornado : hunllefModule.getTornadoList())
+        {
+            Polygon outline;
+            LocalPoint tornadoLocation;
+            final int size = tornado.getComposition().getSize();
+
+            if (tileMode)
+            {
+                final WorldPoint worldLocation = tornado.getWorldLocation();
+                if (worldLocation == null) continue;
+
+                // Using this deprecated method is the best way to get the true tile
+                tornadoLocation = LocalPoint.fromWorld(client, worldLocation);
+                if (tornadoLocation == null) continue;
+
+                outline = Perspective.getCanvasTilePoly(client, tornadoLocation);
+                if (outline == null) continue;
+
+            } else {
+                tornadoLocation = tornado.getLocalLocation();
+                if (tornadoLocation == null) continue;
+
+                outline = Perspective.getCanvasTilePoly(client, tornadoLocation);
+            }
+
+            OverlayUtil.renderPolygon(graphics, outline, tornadoHighlightColor, tornadoFillColor, tornadoStroke);
+
+            if (!showTimer) continue;
+
+            final Point tornadoPoint = Perspective.localToCanvas(client, tornadoLocation, worldPlane);
+
+            if (tornadoPoint == null) continue;
+            Shape timerArc = getTornadoTimer(timerAngle, tornadoPoint, outline);
+            OverlayUtil.renderPolygon(graphics, timerArc, tornadoTimerColor, timerFillColor, tornadoStroke);
+        }
+    }
+
+    private Shape getTornadoTimer(double angle, Point drawLocation, Polygon outline) {
+        double height = outline.getBounds().height * .75;
+        double width = outline.getBounds().width * .75;
+        double offsetY = height / 2;
+        double offsetX = width / 2;
+        return new Arc2D.Double(
+                drawLocation.getX() - offsetX, drawLocation.getY() - offsetY,
+                width, height,
+                90, -angle, Arc2D.PIE
+        );
+    }
+}

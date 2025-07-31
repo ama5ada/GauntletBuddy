@@ -3,17 +3,22 @@ package org.gauntletbuddy.modules;
 import lombok.Getter;
 import net.runelite.api.*;
 import net.runelite.api.events.AnimationChanged;
+import net.runelite.api.events.NpcDespawned;
+import net.runelite.api.events.NpcSpawned;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
 import org.gauntletbuddy.config.types.AttackStyleType;
 import org.gauntletbuddy.overlays.CounterOverlay;
+import org.gauntletbuddy.overlays.HunllefHitboxOverlay;
 import org.gauntletbuddy.overlays.PrayerOverlay;
 import org.gauntletbuddy.overlays.WarningOverlay;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public final class HunllefModule implements PluginModule {
@@ -29,6 +34,9 @@ public final class HunllefModule implements PluginModule {
     private PrayerOverlay prayerOverlay;
     @Inject
     private CounterOverlay counterOverlay;
+    @Inject
+    private HunllefHitboxOverlay hunllefHitboxOverlay;
+
 
     @Override
     public void start()
@@ -46,6 +54,7 @@ public final class HunllefModule implements PluginModule {
         overlayManager.add(warningOverlay);
         overlayManager.add(prayerOverlay);
         overlayManager.add(counterOverlay);
+        overlayManager.add(hunllefHitboxOverlay);
 
         if (hunllef != null) {
             currentHunllefPrayer = getHunllefPrayerStyle(hunllef);
@@ -62,6 +71,7 @@ public final class HunllefModule implements PluginModule {
         overlayManager.remove(warningOverlay);
         overlayManager.remove(prayerOverlay);
         overlayManager.remove(counterOverlay);
+        overlayManager.remove(hunllefHitboxOverlay);
     }
 
     private void resetBossState()
@@ -82,6 +92,13 @@ public final class HunllefModule implements PluginModule {
     @Nullable
     @Getter
     private NPC hunllef;
+
+    private static final List<Integer> TORNADO_IDS = List.of(9025, 9039);
+    @Getter
+    private List<NPC> tornadoList = new ArrayList<>();
+    @Getter
+    private long tornadoSpawned;
+
 
     //TODO Add highlighting for hunllef hitbox and tornadoes
 
@@ -195,5 +212,27 @@ public final class HunllefModule implements PluginModule {
             }
         }
         return currentPrayer;
+    }
+
+    @Subscribe
+    void onNpcSpawned(final NpcSpawned npcSpawned)
+    {
+        final NPC npc = npcSpawned.getNpc();
+
+        if (TORNADO_IDS.contains(npc.getId())) {
+            tornadoList.add(npc);
+            tornadoSpawned = System.currentTimeMillis();
+        }
+
+    }
+
+    @Subscribe
+    void onNpcDespawned(final NpcDespawned npcDespawned)
+    {
+        final NPC npc = npcDespawned.getNpc();
+
+        if (TORNADO_IDS.contains(npc.getId())) {
+            tornadoList.clear();
+        }
     }
 }

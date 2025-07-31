@@ -1,10 +1,7 @@
 package org.gauntletbuddy.config;
 
 import net.runelite.client.config.*;
-import org.gauntletbuddy.config.types.GearTierType;
-import org.gauntletbuddy.config.types.PrayerHighlightModeType;
-import org.gauntletbuddy.config.types.SpecificationModeType;
-import org.gauntletbuddy.config.types.TrackingModeType;
+import org.gauntletbuddy.config.types.*;
 
 import java.awt.*;
 
@@ -312,7 +309,7 @@ public interface GauntletBuddyConfig extends Config
 	)
 	default Color prayerHighlightColor()
 	{
-		return new Color(0, 255, 100, 100);
+		return new Color(0, 255, 100, 50);
 	}
 
 	@ConfigItem(
@@ -324,7 +321,7 @@ public interface GauntletBuddyConfig extends Config
 	)
 	default Color prayerMismatchHighlightColor()
 	{
-		return new Color(255, 200, 0, 100);
+		return new Color(255, 200, 0, 50);
 	}
 
 	@ConfigItem(
@@ -344,6 +341,56 @@ public interface GauntletBuddyConfig extends Config
 			section = hunllefUtilities
 	)
 	default TrackingModeType hunllefHitTrackerMode() { return TrackingModeType.COUNTDOWN; }
+
+	@ConfigItem(
+			keyName = "tornadoHighlightMode",
+			name = "Tornado Highlight Mode",
+			description = "Mode for highlighting Hunllef tornadoes",
+			position = 6,
+			section = hunllefUtilities
+	)
+	default TornadoHighlightType tornadoHighlightType() { return TornadoHighlightType.TRUE_TILE; }
+
+	@ConfigItem(
+			keyName = "tornadoTimer",
+			name = "Tornado Timer",
+			description = "Show a circle over each tornado that shrinks showing their time left",
+			position = 7,
+			section = hunllefUtilities
+	)
+	default boolean tornadoTimer() { return true; }
+
+	@Alpha
+	@ConfigItem(
+			keyName = "tornadoTimerColor",
+			name = "Tornado Timer Color",
+			description = "Color of the tornado timer",
+			position = 8,
+			section = hunllefUtilities
+	)
+	default Color tornadoTimerColor() { return new Color(255, 50, 50, 100); }
+
+	@Range(max = 3)
+	@ConfigItem(
+			keyName = "tornadoHighlightWdith",
+			name = "Tornado Highlight Width",
+			description = "Width of Tornado outline stroke",
+			position = 9,
+			section = hunllefUtilities
+	)
+	@Units(Units.PIXELS)
+	default int tornadoOutlineWidth() { return 1; }
+
+	@Alpha
+	@ConfigItem(
+			keyName = "tornadoHighlightColor",
+			name = "Tornado Highlight Color",
+			description = "Color for the tornado highlight",
+			position = 10,
+			section = hunllefUtilities
+	)
+	default Color tornadoHighlightColor() { return new Color(255, 255, 0, 100); }
+
 
 	/**
 	 * Misc Config Section, holds config values for uncategorized utilities

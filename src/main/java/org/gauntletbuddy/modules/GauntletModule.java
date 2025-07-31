@@ -97,7 +97,7 @@ public final class GauntletModule implements PluginModule {
     }
 
     private void refundComponents(GauntletItem parent, int diff) {
-        if(diff == 0) return;
+        if (diff == 0) return;
         Map<GauntletItem, Integer> itemComponents = parent.getComponents();
         for (Map.Entry<GauntletItem, Integer>entry : itemComponents.entrySet()) {
             GauntletItem component = entry.getKey();
