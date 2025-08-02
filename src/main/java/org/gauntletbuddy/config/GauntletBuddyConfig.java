@@ -300,6 +300,7 @@ public interface GauntletBuddyConfig extends Config
 		return PrayerHighlightModeType.ALWAYS;
 	}
 
+	@Alpha
 	@ConfigItem(
 			keyName = "prayerHighlightColor",
 			name = "Prayer Highlight Color",
@@ -312,6 +313,7 @@ public interface GauntletBuddyConfig extends Config
 		return new Color(0, 255, 100, 50);
 	}
 
+	@Alpha
 	@ConfigItem(
 			keyName = "prayerMismatchHighlightColor",
 			name = "Prayer MismatchColor",
@@ -351,31 +353,12 @@ public interface GauntletBuddyConfig extends Config
 	)
 	default TornadoHighlightType tornadoHighlightType() { return TornadoHighlightType.TRUE_TILE; }
 
-	@ConfigItem(
-			keyName = "tornadoTimer",
-			name = "Tornado Timer",
-			description = "Show a circle over each tornado that shrinks showing their time left",
-			position = 7,
-			section = hunllefUtilities
-	)
-	default boolean tornadoTimer() { return true; }
-
-	@Alpha
-	@ConfigItem(
-			keyName = "tornadoTimerColor",
-			name = "Tornado Timer Color",
-			description = "Color of the tornado timer",
-			position = 8,
-			section = hunllefUtilities
-	)
-	default Color tornadoTimerColor() { return new Color(255, 50, 50, 100); }
-
 	@Range(max = 3)
 	@ConfigItem(
-			keyName = "tornadoHighlightWdith",
+			keyName = "tornadoHighlightWidth",
 			name = "Tornado Highlight Width",
 			description = "Width of Tornado outline stroke",
-			position = 9,
+			position = 7,
 			section = hunllefUtilities
 	)
 	@Units(Units.PIXELS)
@@ -386,11 +369,70 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "tornadoHighlightColor",
 			name = "Tornado Highlight Color",
 			description = "Color for the tornado highlight",
-			position = 10,
+			position = 8,
 			section = hunllefUtilities
 	)
 	default Color tornadoHighlightColor() { return new Color(255, 255, 0, 100); }
 
+	@ConfigItem(
+			keyName = "tornadoTimer",
+			name = "Tornado Timer",
+			description = "Show a circle over each tornado that shrinks showing their time left",
+			position = 9,
+			section = hunllefUtilities
+	)
+	default boolean tornadoTimer() { return true; }
+
+
+	@Alpha
+	@ConfigItem(
+			keyName = "tornadoTimerColor",
+			name = "Tornado Timer Color",
+			description = "Color of the tornado timer",
+			position = 10,
+			section = hunllefUtilities
+	)
+	default Color tornadoTimerColor() { return new Color(255, 50, 50, 150); }
+
+	@ConfigItem(
+			keyName = "hunllefTilesHighlight",
+			name = "Hunllef Tiles Highlight",
+			description = "Highlight the tiles that the hunllef occupies",
+			position = 11,
+			section = hunllefUtilities
+	)
+	default boolean hunllefTilesHighlight() { return true; }
+
+	@Range(max = 3)
+	@ConfigItem(
+			keyName = "hunllefHighlightWidth",
+			name = "Hunllef Tiles Highlight Width",
+			description = "Width of Hunllef tile outline stroke",
+			position = 12,
+			section = hunllefUtilities
+	)
+	@Units(Units.PIXELS)
+	default int hunllefHighlightWidth() { return 1; }
+
+	@Alpha
+	@ConfigItem(
+			keyName = "hunllefHighlightColor",
+			name = "Hunllef Highlight Color",
+			description = "Color of the tiles Hunllef stands on",
+			position = 13,
+			section = hunllefUtilities
+	)
+	default Color hunllefHighlightColor() { return new Color(255, 255, 255, 150); }
+
+	@Range(max = 255)
+	@ConfigItem(
+			keyName = "fillOpacity",
+			name = "Fill Opacity",
+			description = "Fill opacity for highlights in hunllef fights",
+			position = 14,
+			section = hunllefUtilities
+	)
+	default int hunllefFillOpacity() { return 50;}
 
 	/**
 	 * Misc Config Section, holds config values for uncategorized utilities
@@ -413,10 +455,19 @@ public interface GauntletBuddyConfig extends Config
 	default boolean debugList() { return false; }
 
 	@ConfigItem(
+			keyName = "hideMissingItems",
+			name = "Hide Missing Items",
+			description = "Hide items not in the inventory from the debug list",
+			position = 2,
+			section = miscUtilities
+	)
+	default boolean hideMissingItems() { return true; }
+
+	@ConfigItem(
 			keyName = "totalTimer",
 			name = "Total Time",
 			description = "Display a timer that counts up from entering The Gauntlet to track total kill time on screen",
-			position = 2,
+			position = 3,
 			section = miscUtilities
 	)
 	default boolean totalTimer() { return true; }
@@ -425,7 +476,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "crystalReminder",
 			name = "Crystal Reminder",
 			description = "Display a chat reminder when you use the last teleport crystal in your inventory",
-			position = 3,
+			position = 4,
 			section = miscUtilities
 	)
 	default boolean crystalReminder() { return true; }
@@ -434,7 +485,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "highlightStations",
 			name = "Highlight Stations",
 			description = "Outline starting room crafting stations to easily tell where they are from outside the room",
-			position = 4,
+			position = 5,
 			section = miscUtilities
 	)
 	default boolean highlightStations() { return false; }
@@ -444,7 +495,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "highlightStationsColor",
 			name = "Station Color",
 			description = "Color for the outline of starting room stations",
-			position = 5,
+			position = 6,
 			section = miscUtilities
 	)
 	default Color highlightStationsColor()
@@ -457,7 +508,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "highlightStationsWidth",
 			name = "Outline Width",
 			description = "Width for the outline of starting room stations",
-			position = 6,
+			position = 7,
 			section = miscUtilities
 	)
 	@Units(Units.PIXELS)

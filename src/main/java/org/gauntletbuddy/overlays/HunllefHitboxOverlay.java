@@ -14,11 +14,13 @@ import javax.inject.Singleton;
 import java.awt.*;
 import java.awt.geom.Arc2D;
 
+
 @Singleton
 public class HunllefHitboxOverlay extends Overlay {
     private final Client client;
     private final GauntletBuddyConfig config;
     private final HunllefModule hunllefModule;
+    private int HUNLLEF_FILL_OPACITY;
     private final long TORNADO_DURATION = 12000;
     private final int TIMER_RADIUS = 15;
 
@@ -36,13 +38,25 @@ public class HunllefHitboxOverlay extends Overlay {
 
     @Override
     public Dimension render(final Graphics2D graphics) {
+        HUNLLEF_FILL_OPACITY = config.hunllefFillOpacity();
         renderTornadoes(graphics);
         renderHunleffBox(graphics);
         return null;
     }
 
     private void renderHunleffBox(final Graphics2D graphics) {
+        final NPC hunllef = hunllefModule.getHunllef();
 
+        if (hunllef == null || hunllef.isDead() || !config.hunllefTilesHighlight()) return;
+
+        final Polygon tiles = hunllef.getCanvasTilePoly();
+
+        if (tiles == null) return;
+
+        Color outlineColor = config.hunllefHighlightColor();
+        Color fillColor = new Color(outlineColor.getRed(), outlineColor.getGreen(), outlineColor.getBlue(), HUNLLEF_FILL_OPACITY);
+
+        OverlayUtil.renderPolygon(graphics, tiles, outlineColor, fillColor, new BasicStroke(config.hunllefHighlightWidth()));
     }
 
     private void renderTornadoes(final Graphics2D graphics) {
@@ -52,9 +66,9 @@ public class HunllefHitboxOverlay extends Overlay {
         final boolean showTimer = config.tornadoTimer();
 
         final Color tornadoHighlightColor = config.tornadoHighlightColor();
-        final Color tornadoFillColor = new Color(tornadoHighlightColor.getRed(), tornadoHighlightColor.getGreen(), tornadoHighlightColor.getBlue(), 30);
+        final Color tornadoFillColor = new Color(tornadoHighlightColor.getRed(), tornadoHighlightColor.getGreen(), tornadoHighlightColor.getBlue(), HUNLLEF_FILL_OPACITY);
         final Color tornadoTimerColor = config.tornadoTimerColor();
-        final Color timerFillColor = new Color(tornadoTimerColor.getRed(), tornadoTimerColor.getGreen(), tornadoTimerColor.getBlue(), 30);
+        final Color timerFillColor = new Color(tornadoTimerColor.getRed(), tornadoTimerColor.getGreen(), tornadoTimerColor.getBlue(), HUNLLEF_FILL_OPACITY);
         final BasicStroke tornadoStroke = new BasicStroke(config.tornadoOutlineWidth());
 
         final int worldPlane = client.getLocalPlayer().getWorldLocation().getPlane();

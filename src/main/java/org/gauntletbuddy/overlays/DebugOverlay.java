@@ -59,6 +59,8 @@ public class DebugOverlay extends Overlay
             fieldValues.put("Corrupted", plugin.isCorrupted());
             for (GauntletItem item : GauntletItem.getGAUNTLET_ITEMS())
             {
+                int itemCount = ItemManager.getResourceCount(item);
+                if (itemCount == 0 && config.hideMissingItems()) continue;
                 fieldValues.put(item.toString(), ItemManager.getResourceCount(item));
             }
         }

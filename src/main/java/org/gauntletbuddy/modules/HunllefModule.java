@@ -67,6 +67,7 @@ public final class HunllefModule implements PluginModule {
     {
         resetBossState();
         hunllef = null;
+        tornadoList.clear();
         eventBus.unregister(this);
         overlayManager.remove(warningOverlay);
         overlayManager.remove(prayerOverlay);
