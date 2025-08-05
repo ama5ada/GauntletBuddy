@@ -11,7 +11,7 @@ import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.AttackStyleType;
 import org.gauntletbuddy.config.types.GauntletItem;
 import org.gauntletbuddy.modules.HunllefModule;
-import org.gauntletbuddy.modules.ItemManager;
+import org.gauntletbuddy.modules.ItemTracker;
 
 import java.util.LinkedHashMap;
 
@@ -26,7 +26,7 @@ public class DebugOverlay extends Overlay
     private final GauntletBuddy plugin;
     private final HunllefModule hunllefModule;
     private final GauntletBuddyConfig config;
-    private final ItemManager itemManager;
+    private final ItemTracker itemTracker;
     private final Client client;
     private final Map<AttackStyleType, Integer> prayToID = Map.of(
             AttackStyleType.MAGIC , 21,
@@ -34,12 +34,12 @@ public class DebugOverlay extends Overlay
 
     @Inject
     public DebugOverlay(final GauntletBuddy plugin, final Client client, final GauntletBuddyConfig config,
-                        final HunllefModule hunllefModule, final ItemManager itemManager)
+                        final HunllefModule hunllefModule, final ItemTracker itemTracker)
     {
         setPosition(OverlayPosition.TOP_LEFT);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
         this.hunllefModule = hunllefModule;
-        this.itemManager = itemManager;
+        this.itemTracker = itemTracker;
         this.plugin = plugin;
         this.client = client;
         this.config = config;
@@ -59,9 +59,9 @@ public class DebugOverlay extends Overlay
             fieldValues.put("Corrupted", plugin.isCorrupted());
             for (GauntletItem item : GauntletItem.getGAUNTLET_ITEMS())
             {
-                int itemCount = ItemManager.getResourceCount(item);
+                int itemCount = ItemTracker.getResourceCount(item);
                 if (itemCount == 0 && config.hideMissingItems()) continue;
-                fieldValues.put(item.toString(), ItemManager.getResourceCount(item));
+                fieldValues.put(item.toString(), ItemTracker.getResourceCount(item));
             }
         }
 

@@ -119,12 +119,15 @@ public enum GauntletItem {
         }
     }
 
+    @Getter
     private final int[] itemIds;
     private final String name;
     @Getter
     private EnumMap<GauntletItem, Integer> components;
     @Getter
     private final boolean craftable;
+    @Override
+    public String toString() { return this.name; }
 
     GauntletItem(String name, final int[] itemIds, final boolean craftable)
     {
@@ -142,12 +145,6 @@ public enum GauntletItem {
     public static Optional<GauntletItem> itemFromId(int itemId)
     {
         return Optional.ofNullable(ID_TO_ITEM.get(itemId));
-    }
-
-    @Override
-    public String toString()
-    {
-        return this.name;
     }
 }
 
