@@ -4,8 +4,10 @@ import com.google.inject.Provides;
 import javax.inject.Inject;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.runelite.api.*;
 import net.runelite.api.events.*;
+import net.runelite.api.widgets.InterfaceID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -16,6 +18,9 @@ import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.modules.GauntletModule;
 import org.gauntletbuddy.modules.HunllefModule;
 import org.gauntletbuddy.overlays.DebugOverlay;
+import org.gauntletbuddy.overlays.TimerOverlay;
+
+import java.time.Instant;
 
 import static net.runelite.api.gameval.VarbitID.*;
 
@@ -53,11 +58,15 @@ public final class GauntletBuddy extends Plugin
 	@Inject
 	private DebugOverlay debugOverlay;
 
+    @Inject
+    private TimerOverlay timerOverlay;
+
 	@Override
 	protected void startUp()
 	{
-		initVars();
+		resetVars();
 		overlayManager.add(debugOverlay);
+        overlayManager.add(timerOverlay);
 
 		// Do not check if the player is inside if the plugin doesn't start while the player is logged in
 		if (client.getGameState() != GameState.LOGGED_IN)
@@ -85,6 +94,7 @@ public final class GauntletBuddy extends Plugin
 	protected void shutDown()
 	{
 		overlayManager.remove(debugOverlay);
+        overlayManager.remove(timerOverlay);
 		hunllefModule.stop();
 		gauntletModule.stop();
 	}
@@ -95,18 +105,25 @@ public final class GauntletBuddy extends Plugin
 	private boolean inside = false;
 	@Getter
 	private boolean corrupted = false;
+    @Getter
+    private long mazeStart = -1;
+    @Getter
+    private long bossStart = -1;
 
 	/**
 	 * Method to initialize all starting values on plugin load
 	 */
-	private void initVars()
+	private void resetVars()
 	{
 		bossing = false;
 		inside = false;
+        corrupted = false;
+        mazeStart = -1;
+        bossStart = -1;
 	}
 
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
 		boolean current_status = client.getVarbitValue(GAUNTLET_START) != 0;
 		if (inside)
@@ -114,9 +131,7 @@ public final class GauntletBuddy extends Plugin
 			// If marked as inside but current_status is false (now outside)
 			if (!current_status)
 			{
-				bossing = false;
-				inside = false;
-				corrupted = false;
+				resetVars();
 				gauntletModule.stop();
 				hunllefModule.stop();
 			}
@@ -128,8 +143,14 @@ public final class GauntletBuddy extends Plugin
 		}
 	}
 
+    @Subscribe
+    void onWidgetLoaded(final WidgetLoaded event)
+    {
+        if (event.getGroupId() == InterfaceID.GAUNTLET_TIMER) mazeStart = Instant.now().getEpochSecond();
+    }
+
 	@Subscribe
-	public  void onGameTick(GameTick gameTick)
+	void onGameTick(GameTick gameTick)
 	{
 		// Early exit if not inside the gauntlet or already in boss no checks need to be run
 		if (!inside || bossing) return;
@@ -138,6 +159,7 @@ public final class GauntletBuddy extends Plugin
 		if (bossing) {
 			hunllefModule.start();
 			gauntletModule.stop();
+            bossStart = Instant.now().getEpochSecond();
 		}
 	}
 }

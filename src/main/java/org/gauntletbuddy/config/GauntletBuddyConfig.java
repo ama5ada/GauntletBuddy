@@ -464,13 +464,13 @@ public interface GauntletBuddyConfig extends Config
 	default boolean hideMissingItems() { return true; }
 
 	@ConfigItem(
-			keyName = "totalTimer",
-			name = "Total Time",
+			keyName = "gauntletTimer",
+			name = "Gauntlet Timer",
 			description = "Display a timer that counts up from entering The Gauntlet to track total kill time on screen",
 			position = 3,
 			section = miscUtilities
 	)
-	default boolean totalTimer() { return true; }
+	default boolean gauntletTimer() { return true; }
 
 	@ConfigItem(
 			keyName = "crystalReminder",
