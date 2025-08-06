@@ -45,7 +45,7 @@ public final class GauntletModule implements PluginModule {
 
     @Subscribe
     public void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
-        //TODO Skip most calculations in the spawn room since people frequently bank items there and crafting occurs there
+        // TODO Skip most calculations in the spawn room since people frequently bank items there and crafting occurs there
         // Exception to this rule is crafting teleport crystals which should add shards to the required total
         itemCounts = updateItemCounts();
     }
@@ -80,16 +80,16 @@ public final class GauntletModule implements PluginModule {
                 }
 
                 if (item.isCraftable() && item != GauntletItem.TELEPORT_CRYSTAL) refundComponents(item, diff);
-                ItemTracker.updateResourceCount(item, diff);
+                itemTracker.updateResourceCount(item, diff);
             });
         }
 
         if (!missingKeys.isEmpty()) {
             for (int itemId : missingKeys) {
-                int diff = itemCounts.get(itemId);
+                int diff = -itemCounts.get(itemId);
                 GauntletItem.itemFromId(itemId).ifPresent( item -> {
                     if (item.isCraftable() && item != GauntletItem.TELEPORT_CRYSTAL) refundComponents(item, diff);
-                    ItemTracker.updateResourceCount(item, diff);
+                    itemTracker.updateResourceCount(item, diff);
                 });
             }
         }
@@ -103,7 +103,7 @@ public final class GauntletModule implements PluginModule {
         for (Map.Entry<GauntletItem, Integer>entry : itemComponents.entrySet()) {
             GauntletItem component = entry.getKey();
             int componentCount = entry.getValue();
-            ItemTracker.updateResourceCount(component, componentCount * diff);
+            itemTracker.updateResourceCount(component, componentCount * diff);
         }
     }
 }

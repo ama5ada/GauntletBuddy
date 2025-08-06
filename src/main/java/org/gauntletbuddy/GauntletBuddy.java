@@ -15,7 +15,6 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.modules.GauntletModule;
 import org.gauntletbuddy.modules.HunllefModule;
-import org.gauntletbuddy.modules.ItemTracker;
 import org.gauntletbuddy.overlays.DebugOverlay;
 
 import static net.runelite.api.gameval.VarbitID.*;
@@ -53,9 +52,6 @@ public final class GauntletBuddy extends Plugin
 
 	@Inject
 	private DebugOverlay debugOverlay;
-
-	@Inject
-	private ItemTracker itemTrack;
 
 	@Override
 	protected void startUp()

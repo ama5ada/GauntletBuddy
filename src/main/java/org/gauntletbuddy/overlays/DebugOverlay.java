@@ -53,15 +53,18 @@ public class DebugOverlay extends Overlay
 
         fieldValues.put("Inside", plugin.isInside());
         fieldValues.put("Bossing", plugin.isBossing());
+        fieldValues.put("Tracking Mode", itemTracker.getItemTrackingMode());
+        fieldValues.put("Specification Mode", itemTracker.getItemSpecificationMode());
+        fieldValues.put("Hide Completed Items", itemTracker.isHideCompleted());
 
         if (plugin.isInside() && !plugin.isBossing())
         {
             fieldValues.put("Corrupted", plugin.isCorrupted());
             for (GauntletItem item : GauntletItem.getGAUNTLET_ITEMS())
             {
-                int itemCount = ItemTracker.getResourceCount(item);
+                int itemCount = itemTracker.getResourceCount(item);
                 if (itemCount == 0 && config.hideMissingItems()) continue;
-                fieldValues.put(item.toString(), ItemTracker.getResourceCount(item));
+                fieldValues.put(item.toString(), itemTracker.getResourceCount(item));
             }
         }
 
