@@ -472,11 +472,20 @@ public interface GauntletBuddyConfig extends Config
 	)
 	default boolean gauntletTimer() { return true; }
 
+    @ConfigItem(
+            keyName = "chatTimer",
+            name = "Chat Timer",
+            description = "Shows a message in the chat box summarizing your last Gauntlet run",
+            position = 4,
+            section = miscUtilities
+    )
+    default boolean chatTimer() { return true; }
+
 	@ConfigItem(
 			keyName = "crystalReminder",
 			name = "Crystal Reminder",
 			description = "Display a chat reminder when you use the last teleport crystal in your inventory",
-			position = 4,
+			position = 5,
 			section = miscUtilities
 	)
 	default boolean crystalReminder() { return true; }
@@ -485,7 +494,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "highlightStations",
 			name = "Highlight Stations",
 			description = "Outline starting room crafting stations to easily tell where they are from outside the room",
-			position = 5,
+			position = 6,
 			section = miscUtilities
 	)
 	default boolean highlightStations() { return false; }
@@ -495,7 +504,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "highlightStationsColor",
 			name = "Station Color",
 			description = "Color for the outline of starting room stations",
-			position = 6,
+			position = 7,
 			section = miscUtilities
 	)
 	default Color highlightStationsColor()
@@ -508,7 +517,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "highlightStationsWidth",
 			name = "Outline Width",
 			description = "Width for the outline of starting room stations",
-			position = 7,
+			position = 8,
 			section = miscUtilities
 	)
 	@Units(Units.PIXELS)

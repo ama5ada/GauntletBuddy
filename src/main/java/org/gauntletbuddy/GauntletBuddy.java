@@ -67,6 +67,9 @@ public final class GauntletBuddy extends Plugin
     @Inject
     private ChatMessageManager chatMessageManager;
 
+    @Inject
+    private GauntletBuddyConfig config;
+
 	@Override
 	protected void startUp()
 	{
@@ -137,7 +140,7 @@ public final class GauntletBuddy extends Plugin
 			// If marked as inside but current_status is false (now outside)
 			if (!current_status)
 			{
-                sendChatTime();
+                if (config.chatTimer()) sendChatTime();
 				resetVars();
 				gauntletModule.stop();
 				hunllefModule.stop();
