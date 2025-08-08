@@ -9,6 +9,10 @@ import net.runelite.api.*;
 import net.runelite.api.events.*;
 import net.runelite.api.widgets.InterfaceID;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatColorType;
+import net.runelite.client.chat.ChatMessageBuilder;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -19,6 +23,7 @@ import org.gauntletbuddy.modules.GauntletModule;
 import org.gauntletbuddy.modules.HunllefModule;
 import org.gauntletbuddy.overlays.DebugOverlay;
 import org.gauntletbuddy.overlays.TimerOverlay;
+import org.gauntletbuddy.utility.TimerStringUtil;
 
 import java.time.Instant;
 
@@ -38,7 +43,7 @@ public final class GauntletBuddy extends Plugin
 	@Inject
 	private ClientThread clientThread;
 
-	@Provides
+    @Provides
 	GauntletBuddyConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(GauntletBuddyConfig.class);
@@ -50,8 +55,6 @@ public final class GauntletBuddy extends Plugin
 	@Inject
 	private GauntletModule gauntletModule;
 
-	//TODO Total time in gauntlet overlay
-
 	@Inject
 	private OverlayManager overlayManager;
 
@@ -60,6 +63,9 @@ public final class GauntletBuddy extends Plugin
 
     @Inject
     private TimerOverlay timerOverlay;
+
+    @Inject
+    private ChatMessageManager chatMessageManager;
 
 	@Override
 	protected void startUp()
@@ -131,6 +137,7 @@ public final class GauntletBuddy extends Plugin
 			// If marked as inside but current_status is false (now outside)
 			if (!current_status)
 			{
+                sendChatTime();
 				resetVars();
 				gauntletModule.stop();
 				hunllefModule.stop();
@@ -162,4 +169,37 @@ public final class GauntletBuddy extends Plugin
             bossStart = Instant.now().getEpochSecond();
 		}
 	}
+
+    private void sendChatTime() {
+        if (mazeStart == -1 || bossStart == -1) {
+            return;
+        }
+
+        final long end = Instant.now().getEpochSecond();
+
+        final String prepTime = TimerStringUtil.formatTimerString(bossStart - mazeStart);
+        final String bossTime = TimerStringUtil.formatTimerString(end - bossStart);
+        final String totalTime = TimerStringUtil.formatTimerString(end - mazeStart);
+
+        final ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder()
+                .append(ChatColorType.NORMAL)
+                .append("Preparation time: ")
+                .append(ChatColorType.HIGHLIGHT)
+                .append(prepTime)
+                .append(ChatColorType.NORMAL)
+                .append(". Hunllef time: ")
+                .append(ChatColorType.HIGHLIGHT)
+                .append(bossTime)
+                .append(ChatColorType.NORMAL)
+                .append(". Total time: ")
+                .append(ChatColorType.HIGHLIGHT)
+                .append(totalTime)
+                .append(ChatColorType.NORMAL)
+                .append(".");
+
+        chatMessageManager.queue(QueuedMessage.builder()
+                .type(ChatMessageType.CONSOLE)
+                .runeLiteFormattedMessage(chatMessageBuilder.build())
+                .build());
+    }
 }

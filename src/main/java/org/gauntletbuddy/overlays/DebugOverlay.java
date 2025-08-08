@@ -36,8 +36,8 @@ public class DebugOverlay extends Overlay
     public DebugOverlay(final GauntletBuddy plugin, final Client client, final GauntletBuddyConfig config,
                         final HunllefModule hunllefModule, final ItemTracker itemTracker)
     {
-        setPosition(OverlayPosition.TOP_LEFT);
-        setLayer(OverlayLayer.ABOVE_WIDGETS);
+        setPosition(OverlayPosition.TOP_CENTER);
+        setLayer(OverlayLayer.UNDER_WIDGETS);
         this.hunllefModule = hunllefModule;
         this.itemTracker = itemTracker;
         this.plugin = plugin;

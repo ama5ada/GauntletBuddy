@@ -8,6 +8,7 @@ import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 import org.gauntletbuddy.GauntletBuddy;
 import org.gauntletbuddy.config.GauntletBuddyConfig;
+import org.gauntletbuddy.utility.TimerStringUtil;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -65,10 +66,10 @@ public final class TimerOverlay extends OverlayPanel {
 
         setClearChildren(false);
         getMenuEntries().add(new OverlayMenuEntry(RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Gauntlet Timer"));
-        setPosition(OverlayPosition.DYNAMIC);
+        setPosition(OverlayPosition.TOP_LEFT);
         setMovable(true);
         setSnappable(true);
-        setPriority(OverlayPriority.HIGH);
+        setPriority(PRIORITY_HIGHEST);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
     }
 
@@ -98,18 +99,11 @@ public final class TimerOverlay extends OverlayPanel {
                 mazeTime = totalTime = update - plugin.getMazeStart();
             }
 
-            mazeTimeComponent.setRight(formatTimerString(mazeTime));
-            bossTimeComponent.setRight(formatTimerString(bossTime));
-            totalTimeComponent.setRight(formatTimerString(totalTime));
+            mazeTimeComponent.setRight(TimerStringUtil.formatTimerString(mazeTime));
+            bossTimeComponent.setRight(TimerStringUtil.formatTimerString(bossTime));
+            totalTimeComponent.setRight(TimerStringUtil.formatTimerString(totalTime));
         }
 
         return super.render(graphics);
-    }
-
-    private static String formatTimerString(final long elapsed) {
-        final long seconds = elapsed % 60;
-        final long minutes = (elapsed % 3600) / 60;
-
-        return String.format("%01d:%02d", minutes, seconds);
     }
 }
