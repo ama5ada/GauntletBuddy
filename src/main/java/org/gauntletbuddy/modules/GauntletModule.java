@@ -43,6 +43,7 @@ public final class GauntletModule implements PluginModule {
         eventBus.unregister(this);
         itemManager.reset();
         inventoryCounts.clear();
+        equipmentCounts.clear();
     }
 
     //TODO Better item tracking overlay, resource highlighting, resource minimap icons
@@ -96,9 +97,8 @@ public final class GauntletModule implements PluginModule {
     }
 
     private void refundComponents(GauntletItem parent, int diff) {
+        if(diff == 0) return;
         Map<GauntletItem, Integer> itemComponents = parent.getComponents();
-        System.out.println(parent);
-        System.out.println(diff);
         for (Map.Entry<GauntletItem, Integer>entry : itemComponents.entrySet()) {
             GauntletItem component = entry.getKey();
             int componentCount = entry.getValue();
