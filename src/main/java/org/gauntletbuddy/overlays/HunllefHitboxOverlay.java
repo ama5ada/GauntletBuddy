@@ -105,22 +105,38 @@ public class HunllefHitboxOverlay extends Overlay {
             }
 
             OverlayUtil.renderPolygon(graphics, outline, tornadoHighlightColor, tornadoFillColor, tornadoStroke);
+            //graphics.setColor(Color.BLACK);
+            //graphics.draw(outline.getBounds());
+            //graphics.setColor(Color.BLUE);
+            //graphics.draw(outline);
 
             if (!showTimer) continue;
 
             final Point tornadoPoint = Perspective.localToCanvas(client, tornadoLocation, worldPlane);
+            int radius = 4;
+            graphics.fillOval(tornadoPoint.getX() - radius, tornadoPoint.getY() - radius, radius * 2, radius * 2);
 
             if (tornadoPoint == null) continue;
+
             Shape timerArc = getTornadoTimer(timerAngle, tornadoPoint, outline);
             OverlayUtil.renderPolygon(graphics, timerArc, tornadoTimerColor, timerFillColor, tornadoStroke);
         }
     }
 
     private Shape getTornadoTimer(double angle, Point drawLocation, Polygon outline) {
-        double height = outline.getBounds().height * .75;
-        double width = outline.getBounds().width * .75;
+        Point sw = new Point(outline.xpoints[0], outline.ypoints[0]);
+        Point se = new Point(outline.xpoints[1], outline.ypoints[1]);
+        Point nw = new Point(outline.xpoints[3], outline.ypoints[3]);
+
+        double height = Math.max(Math.abs(sw.getY() - nw.getY()), Math.abs(sw.getY() - se.getY()));
+        double width = Math.max(Math.abs(sw.getX() - se.getX()), Math.abs(sw.getX() - nw.getX()));
+
+        height *= .8;
+        width *= .8;
+
         double offsetY = height / 2;
         double offsetX = width / 2;
+
         return new Arc2D.Double(
                 drawLocation.getX() - offsetX, drawLocation.getY() - offsetY,
                 width, height,
