@@ -1,6 +1,5 @@
 package org.gauntletbuddy.overlays;
 
-import net.runelite.api.MenuAction;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.components.LineComponent;

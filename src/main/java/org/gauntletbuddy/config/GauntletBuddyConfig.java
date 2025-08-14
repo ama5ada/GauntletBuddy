@@ -377,11 +377,11 @@ public interface GauntletBuddyConfig extends Config
 	@ConfigItem(
 			keyName = "tornadoTimer",
 			name = "Tornado Timer",
-			description = "Show a circle over each tornado that shrinks showing their time left",
+			description = "Options for showing the time left on Hunllef Tornadoes",
 			position = 9,
 			section = hunllefUtilities
 	)
-	default boolean tornadoTimer() { return true; }
+	default TornadoTimerType tornadoTimerType() { return TornadoTimerType.TIMER; }
 
 
 	@Alpha
@@ -525,5 +525,15 @@ public interface GauntletBuddyConfig extends Config
 	{
 		return 2;
 	}
+
+    @Range ( max = 6 )
+    @ConfigItem(
+            keyName = "textOffset",
+            name = "Text Offset",
+            description = "Temporary counter text offset",
+            position = 9,
+            section = miscUtilities
+    )
+    default int textOffset() { return 2; }
 
 }

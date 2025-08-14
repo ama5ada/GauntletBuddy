@@ -4,9 +4,11 @@ import net.runelite.api.*;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.*;
 import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.TornadoHighlightType;
+import org.gauntletbuddy.config.types.TornadoTimerType;
 import org.gauntletbuddy.modules.HunllefModule;
 
 import javax.inject.Inject;
@@ -63,7 +65,7 @@ public class HunllefHitboxOverlay extends Overlay {
         if (config.tornadoHighlightType() == TornadoHighlightType.OFF || hunllefModule.getTornadoList().isEmpty()) return;
 
         final boolean tileMode = config.tornadoHighlightType() == TornadoHighlightType.TRUE_TILE;
-        final boolean showTimer = config.tornadoTimer();
+        final TornadoTimerType tornadoTimerType = config.tornadoTimerType();
 
         final Color tornadoHighlightColor = config.tornadoHighlightColor();
         final Color tornadoFillColor = new Color(tornadoHighlightColor.getRed(), tornadoHighlightColor.getGreen(), tornadoHighlightColor.getBlue(), HUNLLEF_FILL_OPACITY);
@@ -75,7 +77,7 @@ public class HunllefHitboxOverlay extends Overlay {
 
         double timerAngle = 0;
 
-        if (config.tornadoTimer()) {
+        if (tornadoTimerType == TornadoTimerType.TIMER) {
             timerAngle = 360 * Math.max(0, 1.0 - (double) (System.currentTimeMillis() - hunllefModule.getTornadoSpawned()) / TORNADO_DURATION);
         }
 
@@ -105,21 +107,24 @@ public class HunllefHitboxOverlay extends Overlay {
             }
 
             OverlayUtil.renderPolygon(graphics, outline, tornadoHighlightColor, tornadoFillColor, tornadoStroke);
-            //graphics.setColor(Color.BLACK);
-            //graphics.draw(outline.getBounds());
-            //graphics.setColor(Color.BLUE);
-            //graphics.draw(outline);
 
-            if (!showTimer) continue;
+            if (tornadoTimerType == TornadoTimerType.OFF) continue;
 
             final Point tornadoPoint = Perspective.localToCanvas(client, tornadoLocation, worldPlane);
-            int radius = 4;
-            graphics.fillOval(tornadoPoint.getX() - radius, tornadoPoint.getY() - radius, radius * 2, radius * 2);
 
             if (tornadoPoint == null) continue;
 
-            Shape timerArc = getTornadoTimer(timerAngle, tornadoPoint, outline);
-            OverlayUtil.renderPolygon(graphics, timerArc, tornadoTimerColor, timerFillColor, tornadoStroke);
+            if (tornadoTimerType == TornadoTimerType.TIMER) {
+                Shape timerArc = getTornadoTimer(timerAngle, tornadoPoint, outline);
+                OverlayUtil.renderPolygon(graphics, timerArc, tornadoTimerColor, timerFillColor, tornadoStroke);
+            } else {
+                String tornadoTicks = Integer.toString(hunllefModule.getTornadoTicks());
+                graphics.setFont(FontManager.getRunescapeFont());
+                int textWidth = graphics.getFontMetrics().stringWidth(tornadoTicks);
+                int textHeight = graphics.getFontMetrics().getHeight();
+                graphics.drawString(tornadoTicks, tornadoPoint.getX() - textWidth / 2, tornadoPoint.getY() + (textHeight / 2));
+                graphics.drawRect(tornadoPoint.getX() - 3, tornadoPoint.getY() - 3, 6, 6);
+            }
         }
     }
 

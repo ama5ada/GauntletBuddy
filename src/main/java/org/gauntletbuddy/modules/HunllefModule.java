@@ -3,6 +3,7 @@ package org.gauntletbuddy.modules;
 import lombok.Getter;
 import net.runelite.api.*;
 import net.runelite.api.events.AnimationChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.client.eventbus.EventBus;
@@ -56,6 +57,8 @@ public final class HunllefModule implements PluginModule {
         overlayManager.add(counterOverlay);
         overlayManager.add(hunllefHitboxOverlay);
 
+        tornadoTicks = 0;
+
         if (hunllef != null) {
             currentHunllefPrayer = getHunllefPrayerStyle(hunllef);
             previousHunllefPrayer = getHunllefPrayerStyle(hunllef);
@@ -99,6 +102,8 @@ public final class HunllefModule implements PluginModule {
     private List<NPC> tornadoList = new ArrayList<>();
     @Getter
     private long tornadoSpawned;
+    @Getter
+    private int tornadoTicks;
 
 
     //TODO Add highlighting for hunllef hitbox and tornadoes
@@ -221,10 +226,19 @@ public final class HunllefModule implements PluginModule {
         final NPC npc = npcSpawned.getNpc();
 
         if (TORNADO_IDS.contains(npc.getId())) {
+            if (tornadoList.isEmpty()) {
+                tornadoSpawned = System.currentTimeMillis();
+                tornadoTicks = 20;
+            }
             tornadoList.add(npc);
-            tornadoSpawned = System.currentTimeMillis();
         }
 
+    }
+
+    @Subscribe
+    void onGameTick(final GameTick gameTick)
+    {
+        if (tornadoTicks > 0) tornadoTicks -= 1;
     }
 
     @Subscribe

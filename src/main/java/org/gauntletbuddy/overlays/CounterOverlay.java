@@ -3,7 +3,7 @@ package org.gauntletbuddy.overlays;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.api.Point;
-import net.runelite.api.WorldView;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -47,9 +47,11 @@ public class CounterOverlay extends Overlay {
 
         if (textLoc != null)
         {
-            graphics.setFont(new Font("Arial", Font.BOLD, 16));
+            graphics.setFont(FontManager.getRunescapeFont());
             graphics.setColor(Color.YELLOW);
-            graphics.drawString(counterString, textLoc.getX(), textLoc.getY());
+            int textWidth = graphics.getFontMetrics().stringWidth(counterString);
+            int textHeight = graphics.getFontMetrics().getHeight();
+            graphics.drawString(counterString, textLoc.getX() - (textWidth / 2), textLoc.getY() + (textHeight / 2));
         }
 
         return null;
