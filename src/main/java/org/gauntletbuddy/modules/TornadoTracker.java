@@ -135,7 +135,6 @@ public class TornadoTracker {
                     temp += 1;
                 }
             }
-            System.out.println(temp);
             dangerousTiles.put(adjacentPoint, currentDanger);
         }
         return dangerousTiles;

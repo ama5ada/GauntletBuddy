@@ -80,6 +80,8 @@ public class HunllefHitboxOverlay extends Overlay {
         final Color tornadoTimerColor = config.tornadoTimerColor();
         final Color timerFillColor = new Color(tornadoTimerColor.getRed(), tornadoTimerColor.getGreen(), tornadoTimerColor.getBlue(), HUNLLEF_FILL_OPACITY);
         final BasicStroke tornadoStroke = new BasicStroke(config.tornadoOutlineWidth());
+        final Color tornadoPathColor = config.tornadoPathColor();
+        final BasicStroke dangerStroke = new BasicStroke(0);
 
         final int worldPlane = client.getLocalPlayer().getWorldLocation().getPlane();
 
@@ -137,7 +139,7 @@ public class HunllefHitboxOverlay extends Overlay {
             final Set<WorldPoint> dangerousTiles = tornadoTracker.getHighlightTiles();
             for (WorldPoint dangerousTile : dangerousTiles) {
                 Polygon outline = getTornadoPolygon(dangerousTile);
-                OverlayUtil.renderPolygon(graphics, outline, tornadoHighlightColor, tornadoFillColor, tornadoStroke);
+                OverlayUtil.renderPolygon(graphics, outline, tornadoPathColor, tornadoPathColor, dangerStroke);
             }
         }
     }
