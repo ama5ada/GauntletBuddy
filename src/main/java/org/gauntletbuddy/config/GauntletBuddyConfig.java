@@ -394,21 +394,30 @@ public interface GauntletBuddyConfig extends Config
 	)
 	default Color tornadoTimerColor() { return new Color(255, 50, 50, 150); }
 
-	@ConfigItem(
-			keyName = "hunllefTilesHighlight",
-			name = "Hunllef Tiles Highlight",
-			description = "Highlight the tiles that the hunllef occupies",
-			position = 11,
-			section = hunllefUtilities
-	)
-	default boolean hunllefTilesHighlight() { return true; }
+    @ConfigItem(
+            keyName = "hunllefTilesHighlight",
+            name = "Hunllef Tiles Highlight",
+            description = "Highlight the tiles that the hunllef occupies",
+            position = 11,
+            section = hunllefUtilities
+    )
+    default boolean hunllefTilesHighlight() { return true; }
+
+    @ConfigItem(
+            keyName = "showTornadoPaths",
+            name = "Show Tornado Paths",
+            description = "Show tiles that tornadoes can potentially reach",
+            position = 12,
+            section = hunllefUtilities
+    )
+    default boolean showTornadoPaths() { return false; }
 
 	@Range(max = 3)
 	@ConfigItem(
 			keyName = "hunllefHighlightWidth",
 			name = "Hunllef Tiles Highlight Width",
 			description = "Width of Hunllef tile outline stroke",
-			position = 12,
+			position = 13,
 			section = hunllefUtilities
 	)
 	@Units(Units.PIXELS)
@@ -419,7 +428,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "hunllefHighlightColor",
 			name = "Hunllef Highlight Color",
 			description = "Color of the tiles Hunllef stands on",
-			position = 13,
+			position = 14,
 			section = hunllefUtilities
 	)
 	default Color hunllefHighlightColor() { return new Color(255, 255, 255, 150); }
@@ -429,7 +438,7 @@ public interface GauntletBuddyConfig extends Config
 			keyName = "fillOpacity",
 			name = "Fill Opacity",
 			description = "Fill opacity for highlights in hunllef fights",
-			position = 14,
+			position = 15,
 			section = hunllefUtilities
 	)
 	default int hunllefFillOpacity() { return 50;}

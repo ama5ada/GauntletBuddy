@@ -1,19 +1,21 @@
 package org.gauntletbuddy.modules;
 
-import net.runelite.api.Client;
-import net.runelite.api.InventoryID;
-import net.runelite.api.Item;
-import net.runelite.api.ItemContainer;
+import net.runelite.api.*;
+import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import org.gauntletbuddy.config.types.GauntletItem;
+import org.gauntletbuddy.utility.InstanceTileUtil;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public final class GauntletModule implements PluginModule {
@@ -23,6 +25,8 @@ public final class GauntletModule implements PluginModule {
     private EventBus eventBus;
     @Inject
     private ItemTracker itemTracker;
+    @Inject
+    private InstanceTileUtil instanceTileUtil;
 
     private HashMap<Integer, Integer> itemCounts = new HashMap<>();
 
@@ -39,6 +43,30 @@ public final class GauntletModule implements PluginModule {
         eventBus.unregister(this);
         itemTracker.reset();
         itemCounts.clear();
+    }
+
+    @Subscribe
+    public void onGameStateChanged(GameStateChanged gameStateChanged) {
+        Tile[][][] tiles = client.getScene().getTiles();
+        CompletableFuture.runAsync(() -> {
+            processTiles(tiles);
+        });
+    }
+
+    public void processTiles(Tile[][][] tiles) {
+        for (Tile[][] value : tiles) {
+            for (Tile[] item : value) {
+                for (Tile tile : item) {
+                    if (tile != null) {
+                        // Get LocalLocation (relative to scene base)
+                        LocalPoint local = tile.getLocalLocation();
+                        // Get WorldPoint (absolute location on the world map)
+                        WorldPoint world = tile.getWorldLocation();
+                        instanceTileUtil.addPoint(local, world, client);
+                    }
+                }
+            }
+        }
     }
 
     //TODO resource highlighting, resource minimap icons

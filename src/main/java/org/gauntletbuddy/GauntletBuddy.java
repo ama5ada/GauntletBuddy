@@ -23,6 +23,7 @@ import org.gauntletbuddy.modules.GauntletModule;
 import org.gauntletbuddy.modules.HunllefModule;
 import org.gauntletbuddy.overlays.DebugOverlay;
 import org.gauntletbuddy.overlays.TimerOverlay;
+import org.gauntletbuddy.utility.InstanceTileUtil;
 import org.gauntletbuddy.utility.TimerStringUtil;
 
 import java.time.Instant;
@@ -69,6 +70,9 @@ public final class GauntletBuddy extends Plugin
 
     @Inject
     private GauntletBuddyConfig config;
+
+    @Inject
+    private InstanceTileUtil instanceTileUtil;
 
 	@Override
 	protected void startUp()
@@ -129,6 +133,7 @@ public final class GauntletBuddy extends Plugin
         corrupted = false;
         mazeStart = -1;
         bossStart = -1;
+        instanceTileUtil.resetCache();
 	}
 
 	@Subscribe

@@ -10,11 +10,16 @@ import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.TornadoHighlightType;
 import org.gauntletbuddy.config.types.TornadoTimerType;
 import org.gauntletbuddy.modules.HunllefModule;
+import org.gauntletbuddy.modules.TornadoTracker;
+import org.gauntletbuddy.utility.InstanceTileUtil;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.awt.geom.Arc2D;
+import java.util.Set;
 
 
 @Singleton
@@ -22,17 +27,20 @@ public class HunllefHitboxOverlay extends Overlay {
     private final Client client;
     private final GauntletBuddyConfig config;
     private final HunllefModule hunllefModule;
+    private final TornadoTracker tornadoTracker;
     private int HUNLLEF_FILL_OPACITY;
     private final long TORNADO_DURATION = 12000;
-    private final int TIMER_RADIUS = 15;
+    @Inject
+    InstanceTileUtil instanceTileUtil;
 
     @Inject
     public HunllefHitboxOverlay(final Client client, final GauntletBuddyConfig config,
-                                final HunllefModule hunllefModule)
+                                final HunllefModule hunllefModule, final TornadoTracker tornadoTracker)
     {
         this.client = client;
         this.config = config;
         this.hunllefModule = hunllefModule;
+        this.tornadoTracker = tornadoTracker;
 
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.UNDER_WIDGETS);
@@ -85,7 +93,6 @@ public class HunllefHitboxOverlay extends Overlay {
         {
             Polygon outline;
             LocalPoint tornadoLocation;
-            final int size = tornado.getComposition().getSize();
 
             if (tileMode)
             {
@@ -123,9 +130,35 @@ public class HunllefHitboxOverlay extends Overlay {
                 int textWidth = graphics.getFontMetrics().stringWidth(tornadoTicks);
                 int textHeight = graphics.getFontMetrics().getHeight();
                 graphics.drawString(tornadoTicks, tornadoPoint.getX() - textWidth / 2, tornadoPoint.getY() + (textHeight / 2));
-                graphics.drawRect(tornadoPoint.getX() - 3, tornadoPoint.getY() - 3, 6, 6);
             }
         }
+
+        if (config.showTornadoPaths()) {
+            final Set<WorldPoint> dangerousTiles = tornadoTracker.getHighlightTiles();
+            for (WorldPoint dangerousTile : dangerousTiles) {
+                Polygon outline = getTornadoPolygon(dangerousTile);
+                OverlayUtil.renderPolygon(graphics, outline, tornadoHighlightColor, tornadoFillColor, tornadoStroke);
+            }
+        }
+    }
+
+    private Polygon getTornadoPolygon(WorldPoint input) {
+        WorldPoint adjustedPoint = instanceTileUtil.getRealPoint(input);
+        LocalPoint drawPoint = LocalPoint.fromWorld(client, adjustedPoint);
+        if (drawPoint == null) return null;
+        Polygon outline = Perspective.getCanvasTilePoly(client, drawPoint);
+        return outline;
+    }
+
+    private List<WorldPoint> getBossTiles() {
+        List<WorldPoint> ret = new ArrayList<>();
+        List<List<WorldPoint>> matrix = tornadoTracker.getBossRoomTiles();
+
+        for (List<WorldPoint> line : matrix) {
+            ret.addAll(line);
+        }
+
+        return ret;
     }
 
     private Shape getTornadoTimer(double angle, Point drawLocation, Polygon outline) {

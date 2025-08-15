@@ -1,14 +1,14 @@
 package org.gauntletbuddy.modules;
 
 import lombok.Getter;
-import lombok.Setter;
+import net.runelite.api.Client;
 import net.runelite.api.NPC;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.awt.*;
-import java.sql.Array;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -19,13 +19,12 @@ public class TornadoTracker {
     // Start from 11 ticks remaining precomputing for 10 -> 1 ticks
     //
     // Stores the current tiles to highlight
-    @Inject
-    HunllefModule hunllefModule;
+    @Getter
     private Set<WorldPoint> highlightTiles = new HashSet<>();
-    private int currentTick = -1;
+    @Getter
+    private int currentTick;
+
     private HashMap<Set<WorldPoint>, Set<WorldPoint>> possibleHighlightTiles = new HashMap<>();
-    @Setter
-    private boolean corrupted = false;
 
     private final int CORRUPTED_X_LOWER = 1970;
     private final int CORRUPTED_Y_LOWER = 5682;
@@ -39,10 +38,17 @@ public class TornadoTracker {
 
     private final int GAUNTLET_PLANE = 1;
 
+    @Getter
     private int X_LOWER;
+    @Getter
     private int Y_LOWER;
+    @Getter
     private int X_UPPER;
+    @Getter
     private int Y_UPPER;
+
+    @Inject
+    private Client client;
 
     private final List<Point> adjacencies = Arrays.asList(
             new Point(-1, -1),
@@ -55,10 +61,15 @@ public class TornadoTracker {
             new Point(0, -1)
     );
 
+    @Getter
     private List<List<WorldPoint>> bossRoomTiles;
 
     // Generate all sets of possible tornadoes in the next step along with their dangerous tiles
     private void buildNextToradoes(int tick, Set<WorldPoint> tornadoPoints) {
+        if (tick < 0) {
+            reset();
+            return;
+        }
         // Step 1 is get all possible adjacent tiles by current tile
         HashMap<WorldPoint, List<WorldPoint>> adjacentTiles = new HashMap<>();
         for (final WorldPoint currentPoint : tornadoPoints) {
@@ -70,8 +81,8 @@ public class TornadoTracker {
         HashMap<WorldPoint, List<WorldPoint>> dangerousTiles = getDangerousTiles(tick, adjacentTiles);
         // Step 3 Create all possible adjacent tile combinations
         List<Set<WorldPoint>> tileCombinations = new ArrayList<>();
-        buildPointCombinations(tileCombinations, new HashSet<>(), dangerousTiles);
-        // Step 4 Union the sets of possible dangerous tiles of the tiles in all possible adjacent tile combinations
+        buildPointCombinations(tileCombinations, new HashSet<>(), adjacentTiles);
+        // Step 4 Join the sets of possible dangerous tiles of the tiles in all possible adjacent tile combinations
         possibleHighlightTiles = new HashMap<>();
         for (Set<WorldPoint> currPoints : tileCombinations) {
             List<WorldPoint> combinationTiles = new ArrayList<>();
@@ -84,27 +95,21 @@ public class TornadoTracker {
 
     private void buildPointCombinations(List<Set<WorldPoint>> combinations, Set<WorldPoint>base,
                                         HashMap<WorldPoint, List<WorldPoint>> options) {
-        if (options.size() == 0) {
+        if (options.isEmpty()) {
             combinations.add(new HashSet<>(base));
+            return;
         }
         
-        WorldPoint temp = null;
-        
-        for (WorldPoint key : options.keySet()) {
-            temp = key;
-            break;
-        }
-        
+        WorldPoint temp = options.keySet().iterator().next();
         List<WorldPoint> items = options.get(temp);
-        options.remove(temp);
+        HashMap<WorldPoint, List<WorldPoint>> copy = new HashMap<>(options);
+        copy.remove(temp);
         
         for (WorldPoint curr : items) {
-            base.add(curr);
-            buildPointCombinations(combinations, base, options);
-            base.remove(curr);
+            Set<WorldPoint> newBase = new HashSet<>(base);
+            newBase.add(curr);
+            buildPointCombinations(combinations, newBase, copy);
         }
-        
-        options.put(temp, items);
     }
 
     private HashMap<WorldPoint, List<WorldPoint>> getDangerousTiles(int tick, HashMap<WorldPoint,
@@ -117,17 +122,21 @@ public class TornadoTracker {
         HashMap<WorldPoint, List<WorldPoint>> dangerousTiles = new HashMap<>();
         for (final WorldPoint adjacentPoint : baseTiles) {
             List<WorldPoint> currentDanger = new ArrayList<>();
-            int x_low = Math.max(adjacentPoint.getX() - tick, this.X_LOWER);
+            int x_low = Math.max(adjacentPoint.getX() - tick , this.X_LOWER);
             int x_high = Math.min(adjacentPoint.getX() + tick, this.X_UPPER);
             int y_low = Math.max(adjacentPoint.getY() - tick, this.Y_LOWER);
-            int y_high = Math.max(adjacentPoint.getY() + tick, this.Y_UPPER);
-            for (int y = y_low; y <= y_high; y ++) {
-                for (int x = x_low; x <= x_high; x ++) {
+            int y_high = Math.min(adjacentPoint.getY() + tick, this.Y_UPPER);
+            int temp = 0;
+            for (int y = y_low; y <= y_high; y++) {
+                for (int x = x_low; x <= x_high; x++) {
                     int list_x = x - this.X_LOWER;
-                    int list_y = y - this.Y_UPPER;
+                    int list_y = y - this.Y_LOWER;
                     currentDanger.add(bossRoomTiles.get(list_y).get(list_x));
+                    temp += 1;
                 }
             }
+            System.out.println(temp);
+            dangerousTiles.put(adjacentPoint, currentDanger);
         }
         return dangerousTiles;
     }
@@ -147,26 +156,31 @@ public class TornadoTracker {
         return possibleSteps;
     }
 
-    public Set<WorldPoint> getHighlightTiles(int tick) {
-        if (tick != currentTick) {
-            currentTick = tick;
-            Set<WorldPoint> tornadoPoints = new HashSet<>();
-            for (final NPC tornado : hunllefModule.getTornadoList()) {
-                WorldPoint tornadoPoint = tornado.getWorldLocation();
-                tornadoPoints.add(tornadoPoint);
-            }
-            highlightTiles = possibleHighlightTiles.getOrDefault(tornadoPoints, new HashSet<>());
-            CompletableFuture.runAsync(() -> {
-                buildNextToradoes(currentTick - 1, tornadoPoints);
-            });
+    private Set<WorldPoint> getTrueTornadoTiles(List<NPC> tornadoList) {
+        Set<WorldPoint> tornadoPoints = new HashSet<>();
+        for (final NPC tornado : tornadoList) {
+            WorldPoint wp = tornado.getWorldLocation();
+            LocalPoint trueTile = LocalPoint.fromWorld(client, wp);
+            WorldPoint relativeWorldPoint = WorldPoint.fromLocalInstance(client, trueTile);
+            tornadoPoints.add(relativeWorldPoint);
         }
-        return highlightTiles;
+        return tornadoPoints;
+    }
+
+    public void updateCache(int tick, List<NPC> tornadoList) {
+        currentTick = tick;
+        Set<WorldPoint> tornadoPoints = getTrueTornadoTiles(tornadoList);
+        highlightTiles = possibleHighlightTiles.getOrDefault(tornadoPoints, new HashSet<>());
+        if (tick > 7) return;
+        CompletableFuture.runAsync(() -> {
+            buildNextToradoes(tick - 1, tornadoPoints);
+        });
     }
 
     public void reset() {
-        currentTick = -1;
         highlightTiles = new HashSet<>();
         possibleHighlightTiles = new HashMap<>();
+        currentTick = -1;
     }
 
     public void setConstants(boolean corrupted) {
@@ -184,7 +198,7 @@ public class TornadoTracker {
         bossRoomTiles = new ArrayList<>();
         for (int y = this.Y_LOWER; y <= this.Y_UPPER; y ++) {
             List<WorldPoint> rowTiles = new ArrayList<>();
-            for (int x = this.X_LOWER; y <= this.X_UPPER; x++) {
+            for (int x = this.X_LOWER; x <= this.X_UPPER; x++) {
                 rowTiles.add(new WorldPoint(x, y, GAUNTLET_PLANE));
             }
             bossRoomTiles.add(rowTiles);

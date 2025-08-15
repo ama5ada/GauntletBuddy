@@ -12,6 +12,7 @@ import org.gauntletbuddy.config.types.AttackStyleType;
 import org.gauntletbuddy.config.types.GauntletItem;
 import org.gauntletbuddy.modules.HunllefModule;
 import org.gauntletbuddy.modules.ItemTracker;
+import org.gauntletbuddy.modules.TornadoTracker;
 
 import java.util.LinkedHashMap;
 
@@ -31,11 +32,13 @@ public class DebugOverlay extends Overlay
     private final Map<AttackStyleType, Integer> prayToID = Map.of(
             AttackStyleType.MAGIC , 21,
             AttackStyleType.RANGE , 22);
+    private final TornadoTracker tornadoTracker;
 
     @Inject
     public DebugOverlay(final GauntletBuddy plugin, final Client client, final GauntletBuddyConfig config,
-                        final HunllefModule hunllefModule, final ItemTracker itemTracker)
+                        final HunllefModule hunllefModule, final ItemTracker itemTracker, TornadoTracker tornadoTracker)
     {
+        this.tornadoTracker = tornadoTracker;
         setPosition(OverlayPosition.TOP_CENTER);
         setLayer(OverlayLayer.UNDER_WIDGETS);
         this.hunllefModule = hunllefModule;

@@ -9,6 +9,7 @@ import net.runelite.api.events.NpcSpawned;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
+import org.gauntletbuddy.GauntletBuddy;
 import org.gauntletbuddy.config.types.AttackStyleType;
 import org.gauntletbuddy.overlays.CounterOverlay;
 import org.gauntletbuddy.overlays.HunllefHitboxOverlay;
@@ -37,6 +38,10 @@ public final class HunllefModule implements PluginModule {
     private CounterOverlay counterOverlay;
     @Inject
     private HunllefHitboxOverlay hunllefHitboxOverlay;
+    @Inject
+    private TornadoTracker tornadoTracker;
+    @Inject
+    private GauntletBuddy gauntletBuddy;
 
 
     @Override
@@ -58,6 +63,7 @@ public final class HunllefModule implements PluginModule {
         overlayManager.add(hunllefHitboxOverlay);
 
         tornadoTicks = 0;
+        tornadoTracker.setConstants(gauntletBuddy.isCorrupted());
 
         if (hunllef != null) {
             currentHunllefPrayer = getHunllefPrayerStyle(hunllef);
@@ -104,6 +110,10 @@ public final class HunllefModule implements PluginModule {
     private long tornadoSpawned;
     @Getter
     private int tornadoTicks;
+    @Getter
+    private int x_offset;
+    @Getter
+    private int y_offset;
 
 
     //TODO Add highlighting for hunllef hitbox and tornadoes
@@ -238,7 +248,10 @@ public final class HunllefModule implements PluginModule {
     @Subscribe
     void onGameTick(final GameTick gameTick)
     {
-        if (tornadoTicks > 0) tornadoTicks -= 1;
+        if (tornadoTicks > 0) {
+            tornadoTicks -= 1;
+            tornadoTracker.updateCache(tornadoTicks, tornadoList);
+        }
     }
 
     @Subscribe
