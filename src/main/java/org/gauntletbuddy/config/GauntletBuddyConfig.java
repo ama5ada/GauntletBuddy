@@ -500,13 +500,13 @@ public interface GauntletBuddyConfig extends Config
     default boolean chatTimer() { return true; }
 
 	@ConfigItem(
-			keyName = "crystalReminder",
-			name = "Crystal Reminder",
-			description = "Display a chat reminder when you use the last teleport crystal in your inventory",
+			keyName = "mustCookFish",
+			name = "Must Cook Fish",
+			description = "Remove options for entering the boss room if you have raw fish in your inventory",
 			position = 5,
 			section = miscUtilities
 	)
-	default boolean crystalReminder() { return true; }
+	default boolean mustCookFish() { return true; }
 
 	@ConfigItem(
 			keyName = "highlightStations",

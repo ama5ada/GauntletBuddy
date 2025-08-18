@@ -5,16 +5,17 @@ import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.PostMenuSort;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.GauntletItem;
 import org.gauntletbuddy.utility.InstanceTileUtil;
+import static net.runelite.api.ItemID.RAW_PADDLEFISH;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Singleton
@@ -27,6 +28,8 @@ public final class GauntletModule implements PluginModule {
     private ItemTracker itemTracker;
     @Inject
     private InstanceTileUtil instanceTileUtil;
+    @Inject
+    private GauntletBuddyConfig config;
 
     private HashMap<Integer, Integer> itemCounts = new HashMap<>();
 
@@ -44,6 +47,8 @@ public final class GauntletModule implements PluginModule {
         itemTracker.reset();
         itemCounts.clear();
     }
+
+    //TODO resource highlighting, resource minimap icons
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged gameStateChanged) {
@@ -69,7 +74,32 @@ public final class GauntletModule implements PluginModule {
         }
     }
 
-    //TODO resource highlighting, resource minimap icons
+    @Subscribe
+    public void onPostMenuSort(PostMenuSort postMenuSort) {
+        if (!config.mustCookFish()) return;
+        final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
+        if (container == null) return;
+
+        boolean hasRawFish = false;
+        for (Item item : container.getItems()) {
+            if (item.getId() == RAW_PADDLEFISH) {
+                hasRawFish = true;
+                break;
+            }
+        }
+
+        if (!hasRawFish) return;
+
+        ArrayList<MenuEntry> filteredEntries = new ArrayList<>();
+
+        for (MenuEntry entry : client.getMenuEntries()) {
+            if (entry.getOption().equals("Quick-pass") || entry.getOption().equals("Pass")) continue;
+            filteredEntries.add(entry);
+        }
+
+        MenuEntry[] filteredArray = new MenuEntry[filteredEntries.size()];
+        client.setMenuEntries(filteredEntries.toArray(filteredArray));
+    }
 
     @Subscribe
     public void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
