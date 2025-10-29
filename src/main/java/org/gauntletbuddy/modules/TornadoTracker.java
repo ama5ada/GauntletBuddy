@@ -3,8 +3,8 @@ package org.gauntletbuddy.modules;
 import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
-import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import org.gauntletbuddy.utility.InstanceTileUtil;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,6 +25,9 @@ public class TornadoTracker {
     private int currentTick;
 
     private HashMap<Set<WorldPoint>, Set<WorldPoint>> possibleHighlightTiles = new HashMap<>();
+
+    @Inject
+    private InstanceTileUtil instanceTileUtil;
 
     private final int CORRUPTED_X_LOWER = 1970;
     private final int CORRUPTED_Y_LOWER = 5682;
@@ -126,13 +129,11 @@ public class TornadoTracker {
             int x_high = Math.min(adjacentPoint.getX() + tick, this.X_UPPER);
             int y_low = Math.max(adjacentPoint.getY() - tick, this.Y_LOWER);
             int y_high = Math.min(adjacentPoint.getY() + tick, this.Y_UPPER);
-            int temp = 0;
             for (int y = y_low; y <= y_high; y++) {
                 for (int x = x_low; x <= x_high; x++) {
                     int list_x = x - this.X_LOWER;
                     int list_y = y - this.Y_LOWER;
                     currentDanger.add(bossRoomTiles.get(list_y).get(list_x));
-                    temp += 1;
                 }
             }
             dangerousTiles.put(adjacentPoint, currentDanger);
@@ -159,8 +160,7 @@ public class TornadoTracker {
         Set<WorldPoint> tornadoPoints = new HashSet<>();
         for (final NPC tornado : tornadoList) {
             WorldPoint wp = tornado.getWorldLocation();
-            LocalPoint trueTile = LocalPoint.fromWorld(client, wp);
-            WorldPoint relativeWorldPoint = WorldPoint.fromLocalInstance(client, trueTile);
+            WorldPoint relativeWorldPoint = instanceTileUtil.getTrueTile(wp);
             tornadoPoints.add(relativeWorldPoint);
         }
         return tornadoPoints;

@@ -51,6 +51,15 @@ public interface GauntletBuddyConfig extends Config
 	)
 	default boolean hideCompleted() { return true; }
 
+    @ConfigItem(
+            keyName = "centerBanking",
+            name = "Center Banking",
+            description = "Track items dropped in the center of the gauntlet towards totals (Useful if you need to juggle items)",
+            section = itemTracking,
+            position = 4
+    )
+    default boolean centerBanking() { return true; }
+
 	/**
 	 * Item Tracking manual input section, holds fields to specify item goals manually
 	 */
@@ -239,20 +248,11 @@ public interface GauntletBuddyConfig extends Config
 	default int calculatorPotions() { return 3; }
 
 	@ConfigItem(
-			keyName = "calculatorTeleportCrystals",
-			name = "Teleport Crystals",
-			description = "Number of extra Teleport Crystals you want to create",
-			section = itemsCalculator,
-			position = 8
-	)
-	default int calculatorTeleportCrystals() { return 1; }
-
-	@ConfigItem(
 			keyName = "calculatorPaddlefish",
 			name = "Paddlefish",
 			description = "Number of Paddlefish you want to gather",
 			section = itemsCalculator,
-			position = 9
+			position = 8
 	)
 	default int calculatorPaddlefish() { return 24; }
 

@@ -2,12 +2,14 @@ package org.gauntletbuddy.modules;
 
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.PostMenuSort;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import org.gauntletbuddy.GauntletBuddy;
 import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.GauntletItem;
 import org.gauntletbuddy.utility.InstanceTileUtil;
@@ -30,12 +32,27 @@ public final class GauntletModule implements PluginModule {
     private InstanceTileUtil instanceTileUtil;
     @Inject
     private GauntletBuddyConfig config;
+    @Inject
+    private GauntletBuddy gauntletBuddy;
 
     private HashMap<Integer, Integer> itemCounts = new HashMap<>();
+
+    private WorldArea spawnRoomArea;
+    private final WorldPoint CORRUPTED_SPAWN_COORDINATE = new WorldPoint(1970, 5666, 1);
+    private final WorldPoint NORMAL_SPAWN_COORDINATE = new WorldPoint(1906, 5666, 1);
+
+    private void setConstants() {
+        if (gauntletBuddy.isCorrupted()) {
+            spawnRoomArea = new WorldArea(CORRUPTED_SPAWN_COORDINATE, 12, 12);
+        } else {
+            spawnRoomArea = new WorldArea(NORMAL_SPAWN_COORDINATE, 12, 12);
+        }
+    }
 
     @Override
     public void start()
     {
+        setConstants();
         itemTracker.init();
         eventBus.register(this);
     }
@@ -67,7 +84,8 @@ public final class GauntletModule implements PluginModule {
                         LocalPoint local = tile.getLocalLocation();
                         // Get WorldPoint (absolute location on the world map)
                         WorldPoint world = tile.getWorldLocation();
-                        instanceTileUtil.addPoint(local, world, client);
+                        WorldPoint relative = instanceTileUtil.getTrueTile(world);
+                        instanceTileUtil.addPoint(relative, world);
                     }
                 }
             }
@@ -108,6 +126,13 @@ public final class GauntletModule implements PluginModule {
         itemCounts = updateItemCounts();
     }
 
+    private boolean is_in_spawn() {
+        WorldPoint worldPlayerLocation = client.getLocalPlayer().getWorldLocation();
+        WorldPoint trueTile = instanceTileUtil.getTrueTile(worldPlayerLocation);
+        if (trueTile == null) return false;
+        return trueTile.isInArea(spawnRoomArea);
+    }
+
     private HashMap<Integer, Integer> updateItemCounts() {
         HashMap<Integer, Integer> updatedCounts = new HashMap<>();
 
@@ -137,8 +162,11 @@ public final class GauntletModule implements PluginModule {
                     missingKeys.remove(itemId);
                 }
 
-                if (item.isCraftable() && item != GauntletItem.TELEPORT_CRYSTAL) refundComponents(item, diff);
                 itemTracker.updateResourceCount(item, diff);
+
+                if (item.isCraftable() && item != GauntletItem.TELEPORT_CRYSTAL) {
+                        refundComponents(item, diff);
+                }
             });
         }
 
