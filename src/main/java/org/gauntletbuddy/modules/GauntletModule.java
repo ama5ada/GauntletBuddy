@@ -4,9 +4,7 @@ import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.ItemContainerChanged;
-import net.runelite.api.events.PostMenuSort;
+import net.runelite.api.events.*;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import org.gauntletbuddy.GauntletBuddy;
@@ -36,6 +34,7 @@ public final class GauntletModule implements PluginModule {
     private GauntletBuddy gauntletBuddy;
 
     private HashMap<Integer, Integer> itemCounts = new HashMap<>();
+    private final HashMap<Integer, Integer> groundItems = new HashMap<>();
 
     private WorldArea spawnRoomArea;
     private final WorldPoint CORRUPTED_SPAWN_COORDINATE = new WorldPoint(1970, 5666, 1);
@@ -121,14 +120,44 @@ public final class GauntletModule implements PluginModule {
 
     @Subscribe
     public void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
-        // TODO Skip most calculations in the spawn room since people frequently bank items there and crafting occurs there
-        // Exception to this rule is crafting teleport crystals which should add shards to the required total
         itemCounts = updateItemCounts();
     }
 
-    private boolean is_in_spawn() {
-        WorldPoint worldPlayerLocation = client.getLocalPlayer().getWorldLocation();
-        WorldPoint trueTile = instanceTileUtil.getTrueTile(worldPlayerLocation);
+    @Subscribe
+    public void onItemSpawned(ItemSpawned itemSpawned) {
+        System.out.println("SPAWN EVENT");
+        updateGroundItems(itemSpawned.getItem().getId(), itemSpawned.getTile().getWorldLocation(), itemSpawned.getItem().getQuantity());
+    }
+
+    @Subscribe
+    public void onItemDespawned(ItemDespawned itemDespawned) {
+        System.out.println("DESPAWN EVENT");
+        updateGroundItems(itemDespawned.getItem().getId(), itemDespawned.getTile().getWorldLocation(), itemDespawned.getItem().getQuantity() * -1);
+    }
+
+    /**
+     *
+     * @param itemID - int representing the itemID of the spawned item
+     * @param eventLocation - WorldPoint where the item spawned
+     * @param diff - quantity of item showing up on the ground, negative if the item is disappearing (being picked up)
+     */
+    private void updateGroundItems(int itemID, WorldPoint eventLocation, int diff) {
+        // If center banking is off or the item is not dropped at spawn skip these calculations
+        // Also, if the event location is not under the player ignore it (dropped or picked up items are always on the player location)
+        if (!config.centerBanking() || !is_in_spawn(eventLocation) || !(eventLocation.equals(client.getLocalPlayer().getWorldLocation()))) return;
+
+        GauntletItem.itemFromId(itemID).ifPresent(item -> {
+            // Track the ground item counts in a map in case the setting is toggled during a run so this information can be used to reconcile tracked items
+            groundItems.put(itemID, groundItems.getOrDefault(itemID, 0) + diff);
+            itemTracker.updateResourceCount(item, diff);
+            if (item.isCraftable() && item != GauntletItem.TELEPORT_CRYSTAL) {
+                refundComponents(item, diff);
+            }
+        });
+    }
+
+    private boolean is_in_spawn(WorldPoint checkLocation) {
+        WorldPoint trueTile = instanceTileUtil.getTrueTile(checkLocation);
         if (trueTile == null) return false;
         return trueTile.isInArea(spawnRoomArea);
     }

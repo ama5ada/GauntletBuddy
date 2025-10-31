@@ -23,35 +23,17 @@ public class TornadoTracker {
     private Set<WorldPoint> highlightTiles = new HashSet<>();
     @Getter
     private int currentTick;
+    private int X_LOWER;
+    private int Y_LOWER;
+    private int X_UPPER;
+    private int Y_UPPER;
 
     private HashMap<Set<WorldPoint>, Set<WorldPoint>> possibleHighlightTiles = new HashMap<>();
 
     @Inject
-    private InstanceTileUtil instanceTileUtil;
-
-    private final int CORRUPTED_X_LOWER = 1970;
-    private final int CORRUPTED_Y_LOWER = 5682;
-    private final int CORRUPTED_X_UPPER = 1981;
-    private final int CORRUPTED_Y_UPPER = 5693;
-
-    private final int GAUNTLET_X_LOWER = 1906;
-    private final int GAUNTLET_Y_LOWER = 5682;
-    private final int GAUNTLET_X_UPPER = 1917;
-    private final int GAUNTLET_Y_UPPER = 5693;
-
-    private final int GAUNTLET_PLANE = 1;
-
-    @Getter
-    private int X_LOWER;
-    @Getter
-    private int Y_LOWER;
-    @Getter
-    private int X_UPPER;
-    @Getter
-    private int Y_UPPER;
-
-    @Inject
     private Client client;
+    @Inject
+    private InstanceTileUtil instanceTileUtil;
 
     private final List<Point> adjacencies = Arrays.asList(
             new Point(-1, -1),
@@ -184,20 +166,21 @@ public class TornadoTracker {
 
     public void setConstants(boolean corrupted) {
         if (corrupted) {
-            this.X_LOWER = CORRUPTED_X_LOWER;
-            this.Y_LOWER = CORRUPTED_Y_LOWER;
-            this.X_UPPER = CORRUPTED_X_UPPER;
-            this.Y_UPPER = CORRUPTED_Y_UPPER;
+            this.X_LOWER = 1970;
+            this.Y_LOWER = 5682;
+            this.X_UPPER = 1981;
+            this.Y_UPPER = 5693;
         } else {
-            this.X_LOWER = GAUNTLET_X_LOWER;
-            this.Y_LOWER = GAUNTLET_Y_LOWER;
-            this.X_UPPER = GAUNTLET_X_UPPER;
-            this.Y_UPPER = GAUNTLET_Y_UPPER;
+            this.X_LOWER = 1906;
+            this.Y_LOWER = 5682;
+            this.X_UPPER = 1917;
+            this.Y_UPPER = 5693;
         }
         bossRoomTiles = new ArrayList<>();
         for (int y = this.Y_LOWER; y <= this.Y_UPPER; y ++) {
             List<WorldPoint> rowTiles = new ArrayList<>();
             for (int x = this.X_LOWER; x <= this.X_UPPER; x++) {
+                int GAUNTLET_PLANE = 1;
                 rowTiles.add(new WorldPoint(x, y, GAUNTLET_PLANE));
             }
             bossRoomTiles.add(rowTiles);
