@@ -67,31 +67,6 @@ public final class GauntletModule implements PluginModule {
     //TODO resource highlighting, resource minimap icons
 
     @Subscribe
-    public void onGameStateChanged(GameStateChanged gameStateChanged) {
-        Tile[][][] tiles = client.getScene().getTiles();
-        CompletableFuture.runAsync(() -> {
-            processTiles(tiles);
-        });
-    }
-
-    public void processTiles(Tile[][][] tiles) {
-        for (Tile[][] value : tiles) {
-            for (Tile[] item : value) {
-                for (Tile tile : item) {
-                    if (tile != null) {
-                        // Get LocalLocation (relative to scene base)
-                        LocalPoint local = tile.getLocalLocation();
-                        // Get WorldPoint (absolute location on the world map)
-                        WorldPoint world = tile.getWorldLocation();
-                        WorldPoint relative = instanceTileUtil.getTrueTile(world);
-                        instanceTileUtil.addPoint(relative, world);
-                    }
-                }
-            }
-        }
-    }
-
-    @Subscribe
     public void onPostMenuSort(PostMenuSort postMenuSort) {
         if (!config.mustCookFish()) return;
         final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);

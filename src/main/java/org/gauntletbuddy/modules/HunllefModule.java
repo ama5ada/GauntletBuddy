@@ -6,6 +6,7 @@ import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -15,6 +16,7 @@ import org.gauntletbuddy.overlays.CounterOverlay;
 import org.gauntletbuddy.overlays.HunllefHitboxOverlay;
 import org.gauntletbuddy.overlays.PrayerOverlay;
 import org.gauntletbuddy.overlays.WarningOverlay;
+import org.gauntletbuddy.utility.InstanceTileUtil;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -42,6 +44,10 @@ public final class HunllefModule implements PluginModule {
     private TornadoTracker tornadoTracker;
     @Inject
     private GauntletBuddy gauntletBuddy;
+    @Inject
+    private InstanceTileUtil instanceTileUtil;
+    @Inject
+    private ClientThread clientThread;
 
 
     @Override
@@ -69,6 +75,10 @@ public final class HunllefModule implements PluginModule {
             currentHunllefPrayer = getHunllefPrayerStyle(hunllef);
             previousHunllefPrayer = getHunllefPrayerStyle(hunllef);
         }
+
+        clientThread.invokeLater(() -> {
+            instanceTileUtil.mapInstanceTiles();
+        });
     }
 
     @Override
