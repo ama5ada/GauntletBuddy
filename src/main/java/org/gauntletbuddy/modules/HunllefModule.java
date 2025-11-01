@@ -125,9 +125,6 @@ public final class HunllefModule implements PluginModule {
     @Getter
     private int y_offset;
 
-
-    //TODO Add highlighting for hunllef hitbox and tornadoes
-
     @Subscribe
     public void onAnimationChanged(AnimationChanged animationChanged)
     {

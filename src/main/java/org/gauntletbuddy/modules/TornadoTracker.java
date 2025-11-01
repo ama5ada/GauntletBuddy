@@ -16,8 +16,6 @@ import java.util.concurrent.CompletableFuture;
 @Singleton
 public class TornadoTracker {
     // Track the tiles that are safe from tornadoes on each tick
-    // Start from 11 ticks remaining precomputing for 10 -> 1 ticks
-    //
     // Stores the current tiles to highlight
     @Getter
     private Set<WorldPoint> highlightTiles = new HashSet<>();

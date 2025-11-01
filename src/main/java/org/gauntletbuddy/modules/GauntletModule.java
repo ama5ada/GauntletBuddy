@@ -100,13 +100,11 @@ public final class GauntletModule implements PluginModule {
 
     @Subscribe
     public void onItemSpawned(ItemSpawned itemSpawned) {
-        System.out.println("SPAWN EVENT");
         updateGroundItems(itemSpawned.getItem().getId(), itemSpawned.getTile().getWorldLocation(), itemSpawned.getItem().getQuantity());
     }
 
     @Subscribe
     public void onItemDespawned(ItemDespawned itemDespawned) {
-        System.out.println("DESPAWN EVENT");
         updateGroundItems(itemDespawned.getItem().getId(), itemDespawned.getTile().getWorldLocation(), itemDespawned.getItem().getQuantity() * -1);
     }
 
