@@ -88,16 +88,15 @@ public final class GauntletBuddy extends Plugin
 		}
 
 		clientThread.invoke(() -> {
+            inside = true;
+            corrupted = client.getVarbitValue(GAUNTLET_CORRUPTED) != 0;
 			if (client.getVarbitValue(GAUNTLET_BOSS_STARTED) != 0)
 			{
-				inside = true;
 				bossing = true;
 				hunllefModule.start();
 			}
 			else if (client.getVarbitValue(GAUNTLET_START) != 0)
 			{
-				inside = true;
-				corrupted = client.getVarbitValue(GAUNTLET_CORRUPTED) != 0;
 				gauntletModule.start();
 			}
 		});

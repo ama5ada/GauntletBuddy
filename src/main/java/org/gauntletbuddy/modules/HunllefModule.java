@@ -76,6 +76,10 @@ public final class HunllefModule implements PluginModule {
             previousHunllefPrayer = getHunllefPrayerStyle(hunllef);
         }
 
+        instanceTileUtil.resetCache();
+
+        // Guarantee that mapping tiles will be done thread-safely regardless of when the module is started
+        // Since tile mapping is currently only used in the boss room only map scene tiles when this module starts
         clientThread.invokeLater(() -> {
             instanceTileUtil.mapInstanceTiles();
         });
