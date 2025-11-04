@@ -62,12 +62,12 @@ public enum GauntletItem {
                 Map.entry(CRYSTAL_SHARDS, 10)
         ));
         UNFINISHED_POTION.components = new EnumMap<>(Map.ofEntries(
-                Map.entry(CRYSTAL_SHARDS, 10),
+                Map.entry(VIAL, 1),
                 Map.entry(GRYM_LEAF, 1)
         ));
         ENIGOL_POTION.components = new EnumMap<>(Map.ofEntries(
-                Map.entry(CRYSTAL_SHARDS, 20),
-                Map.entry(GRYM_LEAF, 1)
+                Map.entry(UNFINISHED_POTION, 1),
+                Map.entry(CRUSHED_SHARDS, 10)
         ));
         CRUSHED_SHARDS.components = new EnumMap<>(Map.ofEntries(
                 Map.entry(CRYSTAL_SHARDS, 1)
@@ -83,27 +83,27 @@ public enum GauntletItem {
         addComponents(T1_ARMOR, T1_ARMOR_COSTS);
 
         GauntletItem[] T2_FILLERS = { HELMET_T2, LEGS_T2 };
-        Map.Entry[] T2_FILLER_COSTS = { Map.entry(ORE, 2), Map.entry(BARK, 2), Map.entry(LINUM, 2),
-                Map.entry(CRYSTAL_SHARDS, 100)};
+        Map.Entry[] T2_FILLER_COSTS = { Map.entry(ORE, 1), Map.entry(BARK, 1), Map.entry(LINUM, 1),
+                Map.entry(CRYSTAL_SHARDS, 60), Map.entry(HELMET_T1, 1)};
         addComponents(T2_FILLERS, T2_FILLER_COSTS);
 
         GauntletItem[] T3_FILLERS = { HELMET_T3, LEGS_T3 };
-        Map.Entry[] T3_FILLER_COSTS = { Map.entry(ORE, 4), Map.entry(BARK, 4), Map.entry(LINUM, 4),
-                Map.entry(CRYSTAL_SHARDS, 180)};
+        Map.Entry[] T3_FILLER_COSTS = { Map.entry(ORE, 2), Map.entry(BARK, 2), Map.entry(LINUM, 2),
+                Map.entry(CRYSTAL_SHARDS, 80), Map.entry(HELMET_T2, 1)};
         addComponents(T3_FILLERS, T3_FILLER_COSTS);
 
         // Handle T2 and T3 chests separately since they do not share costs with helmet and legs
-        CHEST_T2.components = new EnumMap<>(Map.ofEntries(Map.entry(ORE, 3), Map.entry(BARK, 3),
-                Map.entry(LINUM, 3), Map.entry(CRYSTAL_SHARDS, 100)));
-        CHEST_T3.components = new EnumMap<>(Map.ofEntries(Map.entry(ORE, 5), Map.entry(BARK, 5),
-                Map.entry(LINUM, 5), Map.entry(CRYSTAL_SHARDS, 180)));
+        CHEST_T2.components = new EnumMap<>(Map.ofEntries(Map.entry(ORE, 2), Map.entry(BARK, 2),
+                Map.entry(LINUM, 2), Map.entry(CRYSTAL_SHARDS, 60), Map.entry(CHEST_T1, 1)));
+        CHEST_T3.components = new EnumMap<>(Map.ofEntries(Map.entry(ORE, 2), Map.entry(BARK, 2),
+                Map.entry(LINUM, 2), Map.entry(CRYSTAL_SHARDS, 80), Map.entry(CHEST_T2, 1)));
 
         GauntletItem[] T1_WEAPONS = { BOW_T1, STAFF_T1, HALBERD_T1 };
         Map.Entry[] T1_WEAPON_COSTS = { Map.entry(WEAPON_FRAME, 1), Map.entry(CRYSTAL_SHARDS, 20) };
         addComponents(T1_WEAPONS, T1_WEAPON_COSTS);
 
         GauntletItem[] T2_T3_WEAPONS = { BOW_T2, STAFF_T2, HALBERD_T2, BOW_T3, STAFF_T3, HALBERD_T3 };
-        Map.Entry[] T2_T3_WEAPON_COSTS = { Map.entry(WEAPON_FRAME, 1), Map.entry(CRYSTAL_SHARDS, 80) };
+        Map.Entry[] T2_T3_WEAPON_COSTS = { Map.entry(CRYSTAL_SHARDS, 60), Map.entry(BOW_T1, 1) };
         addComponents(T2_T3_WEAPONS, T2_T3_WEAPON_COSTS);
 
         BOW_T3.components.put(BOW_STRING, 1);

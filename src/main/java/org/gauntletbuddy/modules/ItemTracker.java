@@ -131,7 +131,11 @@ public final class  ItemTracker {
         for (Map.Entry<GauntletItem, Integer> entry : item.getComponents().entrySet()) {
             GauntletItem componentKey = entry.getKey();
             int componentCount = entry.getValue() * count;
-            counter.merge(componentKey, componentCount, Integer::sum);
+            if (componentKey.isCraftable()) {
+                incrementItemComponents(componentKey, componentCount, counter);
+            } else {
+                counter.merge(componentKey, componentCount, Integer::sum);
+            }
         }
     }
 
