@@ -9,6 +9,7 @@ import java.awt.*;
 @ConfigGroup("Gauntlet Buddy")
 public interface GauntletBuddyConfig extends Config
 {
+    String CONFIG_GROUP = "Gauntlet Buddy";
 	/**
 	 * Item Tracking Config Section, holds config values related to whether or not to track items
 	 */
@@ -135,7 +136,7 @@ public interface GauntletBuddyConfig extends Config
 	default int specifiedPaddlefish() { return 24; }
 
 	@ConfigItem(
-			keyName = "bowString",
+			keyName = "specifiedBowString",
 			name = "Bow String",
 			description = "Manually specify if you're looking for a Bow String",
 			section = itemsManual,
@@ -144,7 +145,7 @@ public interface GauntletBuddyConfig extends Config
 	default boolean specifiedBowString() { return false; }
 
 	@ConfigItem(
-			keyName = "orb",
+			keyName = "specifiedOrb",
 			name = "Orb",
 			description = "Manually specify if you're looking for an Orb",
 			section = itemsManual,
@@ -153,7 +154,7 @@ public interface GauntletBuddyConfig extends Config
 	default boolean specifiedOrb() { return false; }
 
 	@ConfigItem(
-			keyName = "spike",
+			keyName = "specifiedSpike",
 			name = "Spike",
 			description = "Manually specify if you're looking for a spike",
 			section = itemsManual,
@@ -543,15 +544,4 @@ public interface GauntletBuddyConfig extends Config
 	{
 		return 2;
 	}
-
-    @Range ( max = 6 )
-    @ConfigItem(
-            keyName = "textOffset",
-            name = "Text Offset",
-            description = "Temporary counter text offset",
-            position = 9,
-            section = miscUtilities
-    )
-    default int textOffset() { return 2; }
-
 }
