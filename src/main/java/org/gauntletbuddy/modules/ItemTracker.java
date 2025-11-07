@@ -11,6 +11,7 @@ import org.gauntletbuddy.config.types.GauntletItem;
 import org.gauntletbuddy.config.types.GearTierType;
 import org.gauntletbuddy.config.types.SpecificationModeType;
 import org.gauntletbuddy.config.types.TrackingModeType;
+import org.gauntletbuddy.utility.GauntletItemMapper;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,8 +32,6 @@ public final class  ItemTracker {
     private TrackingModeType itemTrackingMode;
     @Getter
     private boolean hideCompleted;
-    @Getter
-    private SpecificationModeType itemSpecificationMode;
 
     @Inject
     public ItemTracker(final GauntletBuddyConfig config, final GauntletBuddy gauntletBuddy,
@@ -41,7 +40,6 @@ public final class  ItemTracker {
         this.gauntletBuddy = gauntletBuddy;
         this.itemManager = itemManager;
         this.infoBoxManager = infoBoxManager;
-        this.itemSpecificationMode = config.itemTrackerSpecificationMode();
         this.itemTrackingMode = config.itemTrackingMode();
         this.hideCompleted = config.hideCompleted();
     }
@@ -54,13 +52,23 @@ public final class  ItemTracker {
         gatheredResourceMap.get(item).updateGathered(count);
     }
 
+    public void updateCalculatedTarget(String configKey, int count) {
+
+    }
+
+    public void updateSpecificTarget(String configKey, int target) {
+        GauntletItem targetItem = GauntletItemMapper.specifiedFromKey(configKey);
+        Resource targetResource = gatheredResourceMap.get(targetItem);
+        targetResource.setTarget(target);
+        targetResource.updateGathered(0);
+    }
+
     public void init() {
         for (GauntletItem item : GauntletItem.getGAUNTLET_ITEMS()) {
             BufferedImage resourceImage = itemManager.getImage(item.getItemIds()[0]);
-            Resource gathered = new Resource(resourceImage, infoBoxManager, gauntletBuddy, this);
+            Resource gathered = new Resource(config, resourceImage, infoBoxManager, gauntletBuddy);
             gatheredResourceMap.put(item, gathered);
         }
-        this.itemSpecificationMode = config.itemTrackerSpecificationMode();
         this.itemTrackingMode = config.itemTrackingMode();
         this.hideCompleted = config.hideCompleted();
         setTargets();
@@ -86,7 +94,7 @@ public final class  ItemTracker {
 
     private EnumMap<GauntletItem, Integer> loadConfigTargets() {
         EnumMap<GauntletItem, Integer> configCounts = new EnumMap<>(GauntletItem.class);
-        if (this.itemSpecificationMode == SpecificationModeType.MANUAL) {
+        if (config.itemTrackerSpecificationMode() == SpecificationModeType.MANUAL) {
             configCounts.put(GauntletItem.ORE, config.specifiedCrystalOre());
             configCounts.put(GauntletItem.BARK, config.specifiedPhrenBark());
             configCounts.put(GauntletItem.LINUM, config.specifiedLinumTirinium());
@@ -144,17 +152,17 @@ public final class  ItemTracker {
         private int gathered = 0;
         @Setter
         private int target = 0;
+        private final GauntletBuddyConfig config;
         private ResourceOverlayBox resourceBox;
         private final BufferedImage resourceImage;
         private final InfoBoxManager infoBoxManager;
         private final GauntletBuddy gauntletBuddy;
-        private final ItemTracker itemTracker;
 
-        private Resource(BufferedImage resourceImage, InfoBoxManager infoBoxManager, GauntletBuddy gauntletBuddy, ItemTracker itemTracker) {
+        private Resource(GauntletBuddyConfig config, BufferedImage resourceImage, InfoBoxManager infoBoxManager, GauntletBuddy gauntletBuddy) {
+            this.config = config;
             this.resourceImage = resourceImage;
             this.infoBoxManager = infoBoxManager;
             this.gauntletBuddy = gauntletBuddy;
-            this.itemTracker = itemTracker;
         }
 
         private void createResourceBox() {
@@ -182,7 +190,7 @@ public final class  ItemTracker {
                 }
             }
 
-            if (this.gathered >= target && (itemTracker.getItemTrackingMode() == TrackingModeType.COUNTDOWN || itemTracker.isHideCompleted())) {
+            if (this.gathered >= target && (config.itemTrackingMode() == TrackingModeType.COUNTDOWN || config.hideCompleted())) {
                 destroyOverlayBox();
             } else if (this.gathered >= target) {
                 resourceBox.setColor(Color.GRAY);
@@ -190,7 +198,7 @@ public final class  ItemTracker {
         }
 
         public int getInfoText() {
-            if (itemTracker.getItemTrackingMode() == TrackingModeType.COUNTDOWN) return target - gathered;
+            if (config.itemTrackingMode() == TrackingModeType.COUNTDOWN) return target - gathered;
             return gathered;
         }
     }

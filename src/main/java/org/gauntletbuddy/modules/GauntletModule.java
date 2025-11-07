@@ -11,6 +11,7 @@ import net.runelite.client.events.ConfigChanged;
 import org.gauntletbuddy.GauntletBuddy;
 import org.gauntletbuddy.config.GauntletBuddyConfig;
 import org.gauntletbuddy.config.types.GauntletItem;
+import org.gauntletbuddy.config.types.SpecificationModeType;
 import org.gauntletbuddy.utility.InstanceTileUtil;
 import static net.runelite.api.ItemID.RAW_PADDLEFISH;
 
@@ -143,14 +144,33 @@ public final class GauntletModule implements PluginModule {
      */
     @Subscribe
     public void onConfigChanged(ConfigChanged configChanged) {
-        if (!configChanged.getGroup().equals("Gauntlet Buddy")) return;
-        if (configChanged.getKey().equals("centerBanking")) {
-            boolean centerBanking = Boolean.parseBoolean(configChanged.getNewValue());
-            if (centerBanking) {
-                countGroundItems();
-            } else {
-                clearBankedItems();
-            }
+        // Make sure the config value being changed belongs to this plugin
+        if (!configChanged.getGroup().equals(GauntletBuddyConfig.CONFIG_GROUP)) return;
+        String key = configChanged.getKey();
+
+        // Immediately update the item target if the specification mode matches
+        if (key.startsWith("specified") && config.itemTrackerSpecificationMode() == SpecificationModeType.MANUAL) {
+            itemTracker.updateSpecificTarget(key, Integer.valueOf(configChanged.getNewValue()));
+        } else if (key.startsWith("calculated") &&
+                config.itemTrackerSpecificationMode() == SpecificationModeType.CALCULATED) {
+
+        }
+
+        switch (key) {
+            case "centerBanking":
+                boolean centerBanking = Boolean.parseBoolean(configChanged.getNewValue());
+                if (centerBanking) {
+                    countGroundItems();
+                } else {
+                    clearBankedItems();
+                }
+                break;
+            case "specificationMode":
+                itemTracker.reset();
+                itemTracker.init();
+                break;
+            default:
+                break;
         }
     }
 

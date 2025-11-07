@@ -57,7 +57,7 @@ public class DebugOverlay extends Overlay
         fieldValues.put("Inside", plugin.isInside());
         fieldValues.put("Bossing", plugin.isBossing());
         fieldValues.put("Tracking Mode", itemTracker.getItemTrackingMode());
-        fieldValues.put("Specification Mode", itemTracker.getItemSpecificationMode());
+        fieldValues.put("Specification Mode", config.itemTrackerSpecificationMode());
         fieldValues.put("Hide Completed Items", itemTracker.isHideCompleted());
 
         if (plugin.isInside() && !plugin.isBossing())
