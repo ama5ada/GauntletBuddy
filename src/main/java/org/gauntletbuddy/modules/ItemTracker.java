@@ -52,13 +52,36 @@ public final class  ItemTracker {
         gatheredResourceMap.get(item).updateGathered(count);
     }
 
-    public void updateCalculatedTarget(String configKey, int count) {
-
+    public void updateCalculatedTarget(String configKey, String newTarget, String oldTarget) {
+        GauntletItem newItem = GauntletItemMapper.calculatedFromKey(configKey, newTarget);
+        // Handle paddlefish as a direct update
+        if (newItem.equals(GauntletItem.PADDLEFISH)) {
+            setResourceTargetFromItem(newItem, Integer.parseInt(newTarget));
+            return;
+        }
+        // Other updates require figuring out the difference between the new and old target to calculate the new value
+        EnumMap<GauntletItem, Integer> resourceDelta = new EnumMap<>(GauntletItem.class);
+        // If the changed item is Enigol potions there's no need to pull the old item separately
+        if (newItem.equals(GauntletItem.ENIGOL_POTION)) {
+            incrementItemComponents(GauntletItem.ENIGOL_POTION, Integer.parseInt(newTarget), resourceDelta);
+            incrementItemComponents(GauntletItem.ENIGOL_POTION, -Integer.parseInt(oldTarget), resourceDelta);
+            for (Map.Entry<GauntletItem, Integer> entry : resourceDelta.entrySet()) {
+                Resource targetResource = gatheredResourceMap.get(entry.getKey());
+                setResourceTargetFromItem(entry.getKey(), targetResource.getTarget() + entry.getValue());
+            }
+            return;
+        }
+        // Lastly handle equipment items where the old item is different and needs to be pulled
+        GauntletItem oldItem = GauntletItemMapper.calculatedFromKey(configKey, oldTarget);
     }
 
     public void updateSpecificTarget(String configKey, int target) {
         GauntletItem targetItem = GauntletItemMapper.specifiedFromKey(configKey);
-        Resource targetResource = gatheredResourceMap.get(targetItem);
+        setResourceTargetFromItem(targetItem, target);
+    }
+
+    private void setResourceTargetFromItem(GauntletItem item, int target) {
+        Resource targetResource = gatheredResourceMap.get(item);
         targetResource.setTarget(target);
         targetResource.updateGathered(0);
     }
@@ -88,7 +111,7 @@ public final class  ItemTracker {
         for (Map.Entry<GauntletItem, Integer> entry : configTargets.entrySet()) {
             Resource targetResource = gatheredResourceMap.get(entry.getKey());
             targetResource.setTarget(entry.getValue());
-            if (entry.getValue() > targetResource.getGathered()) targetResource.createResourceBox();
+            targetResource.createResourceBox();
         }
     }
 
@@ -107,26 +130,26 @@ public final class  ItemTracker {
             configCounts.put(GauntletItem.SPIKE, config.specifiedSpike() ? 1 : 0);
         } else {
             ArrayList<GauntletItem> gearPieces = new ArrayList<>();
-            GearTierType helmetTier = config.calculatorHelmetTier();
+            GearTierType helmetTier = config.calculatedHelmetTier();
             if (helmetTier != GearTierType.None) gearPieces.add(GauntletItem.valueOf("HELMET_" + helmetTier.toString()));
-            GearTierType chestTier = config.calculatorBodyTier();
+            GearTierType chestTier = config.calculatedBodyTier();
             if (chestTier != GearTierType.None) gearPieces.add(GauntletItem.valueOf("CHEST_" + chestTier.toString()));
-            GearTierType legTier = config.calculatorLegsTier();
+            GearTierType legTier = config.calculatedLegsTier();
             if (legTier != GearTierType.None) gearPieces.add(GauntletItem.valueOf("LEGS_" + legTier.toString()));
-            GearTierType bowTier = config.calculatorBowTier();
+            GearTierType bowTier = config.calculatedBowTier();
             if (bowTier != GearTierType.None) gearPieces.add(GauntletItem.valueOf("BOW_" + bowTier.toString()));
-            GearTierType staffTier = config.calculatorStaffTier();
+            GearTierType staffTier = config.calculatedStaffTier();
             if (staffTier != GearTierType.None) gearPieces.add(GauntletItem.valueOf("STAFF_" + staffTier.toString()));
-            GearTierType halberdTier = config.calculatorHalberdTier();
+            GearTierType halberdTier = config.calculatedHalberdTier();
             if (halberdTier != GearTierType.None) gearPieces.add(GauntletItem.valueOf("HALBERD_" + halberdTier.toString()));
 
             for (GauntletItem item : gearPieces) {
                 incrementItemComponents(item, configCounts);
             }
 
-            incrementItemComponents(GauntletItem.ENIGOL_POTION, config.calculatorPotions(), configCounts);
+            incrementItemComponents(GauntletItem.ENIGOL_POTION, config.calculatedPotions(), configCounts);
 
-            configCounts.put(GauntletItem.PADDLEFISH, config.calculatorPaddlefish());
+            configCounts.put(GauntletItem.PADDLEFISH, config.calculatedPaddlefish());
         }
         return configCounts;
     }
@@ -136,6 +159,7 @@ public final class  ItemTracker {
     }
 
     private void incrementItemComponents(GauntletItem item, int count, EnumMap<GauntletItem, Integer> counter) {
+        if (item == null) return;
         for (Map.Entry<GauntletItem, Integer> entry : item.getComponents().entrySet()) {
             GauntletItem componentKey = entry.getKey();
             int componentCount = entry.getValue() * count;
@@ -150,7 +174,7 @@ public final class  ItemTracker {
     private static class Resource {
         @Getter
         private int gathered = 0;
-        @Setter
+        @Setter @Getter
         private int target = 0;
         private final GauntletBuddyConfig config;
         private ResourceOverlayBox resourceBox;

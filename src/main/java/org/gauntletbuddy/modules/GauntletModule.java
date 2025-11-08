@@ -150,10 +150,23 @@ public final class GauntletModule implements PluginModule {
 
         // Immediately update the item target if the specification mode matches
         if (key.startsWith("specified") && config.itemTrackerSpecificationMode() == SpecificationModeType.MANUAL) {
-            itemTracker.updateSpecificTarget(key, Integer.valueOf(configChanged.getNewValue()));
+            // Handle boolean values from weapon enhancements
+            String value = configChanged.getNewValue();
+            int parsed = 0;
+            if (value != null) {
+                try {
+                    parsed = Integer.parseInt(value);
+                } catch (NumberFormatException e) {
+                    if (Boolean.parseBoolean(value)) parsed = 1;
+                }
+            }
+            itemTracker.updateSpecificTarget(key, parsed);
         } else if (key.startsWith("calculated") &&
                 config.itemTrackerSpecificationMode() == SpecificationModeType.CALCULATED) {
-
+                System.out.printf("KEY : %s \n", key);
+                System.out.printf("OLD : %s \n", configChanged.getOldValue());
+                System.out.printf("NEW : %s \n", configChanged.getNewValue());
+                itemTracker.updateCalculatedTarget(key, configChanged.getNewValue(), configChanged.getOldValue());
         }
 
         switch (key) {

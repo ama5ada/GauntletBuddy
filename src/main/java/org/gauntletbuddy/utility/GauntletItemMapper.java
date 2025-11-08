@@ -24,4 +24,17 @@ public class GauntletItemMapper {
     {
         return SPECIFIED_KEY_TO_ITEM.get(configKey);
     }
+
+    public static GauntletItem calculatedFromKey(String configKey, String value)
+    {
+        // TODO support parsing equipment using value + key
+        switch(configKey) {
+            case "calculatedPaddlefish":
+                return GauntletItem.PADDLEFISH;
+            case "calculatedPotions":
+                return GauntletItem.ENIGOL_POTION;
+            default:
+                return null;
+        }
+    }
 }

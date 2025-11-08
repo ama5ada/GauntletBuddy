@@ -35,7 +35,7 @@ public interface GauntletBuddyConfig extends Config
 	@ConfigItem(
 			keyName = "specificationMode",
 			name = "Specification Mode",
-			description = "Select manual specification of resources to gather or calculator version",
+			description = "Select manual specification of resources to gather or calculated version",
 			section = itemTracking,
 			position = 2
 	)
@@ -163,7 +163,7 @@ public interface GauntletBuddyConfig extends Config
 	default boolean specifiedSpike() { return false; }
 
 	/**
-	 * Item Calculator Config Section, holds config values for calculating items that need to be tracked
+	 * Item calculated Config Section, holds config values for calculating items that need to be tracked
 	 */
 	@ConfigSection(
 			name = "Calculated Item Goals",
@@ -171,91 +171,91 @@ public interface GauntletBuddyConfig extends Config
 			position = 3,
 			closedByDefault = true
 	)
-	String itemsCalculator = "itemCalculator";
+	String itemCalculator = "itemCalculator";
 
 	@ConfigItem(
-			keyName = "calculatorHelm",
+			keyName = "calculatedHelm",
 			name = "Helm",
 			description = "Tier of helm you want to create",
-			section = itemsCalculator,
+			section = itemCalculator,
 			position = 1
 	)
-	default GearTierType calculatorHelmetTier() {
+	default GearTierType calculatedHelmetTier() {
 		return GearTierType.T1;
 	}
 
 	@ConfigItem(
-			keyName = "calculatorBody",
+			keyName = "calculatedBody",
 			name = "Body",
 			description = "Tier of body you want to create",
-			section = itemsCalculator,
+			section = itemCalculator,
 			position = 2
 	)
-	default GearTierType calculatorBodyTier() {
+	default GearTierType calculatedBodyTier() {
 		return GearTierType.T1;
 	}
 
 	@ConfigItem(
-			keyName = "calculatorLegs",
+			keyName = "calculatedLegs",
 			name = "Legs",
 			description = "Tier of legs you want to create",
-			section = itemsCalculator,
+			section = itemCalculator,
 			position = 3
 	)
-	default GearTierType calculatorLegsTier() {
+	default GearTierType calculatedLegsTier() {
 		return GearTierType.T1;
 	}
 
 	@ConfigItem(
-			keyName = "calculatorBow",
+			keyName = "calculatedBow",
 			name = "Bow",
 			description = "Tier of bow you want to create",
-			section = itemsCalculator,
+			section = itemCalculator,
 			position = 4
 	)
-	default GearTierType calculatorBowTier() {
+	default GearTierType calculatedBowTier() {
 		return GearTierType.T3;
 	}
 
 	@ConfigItem(
-			keyName = "calculatorStaff",
+			keyName = "calculatedStaff",
 			name = "Staff",
 			description = "Tier of staff you want to create",
-			section = itemsCalculator,
+			section = itemCalculator,
 			position = 5
 	)
-	default GearTierType calculatorStaffTier() {
+	default GearTierType calculatedStaffTier() {
 		return GearTierType.T2;
 	}
 
 	@ConfigItem(
-			keyName = "calculatorHalberd",
+			keyName = "calculatedHalberd",
 			name = "Halberd",
 			description = "Tier of halberd you want to create",
-			section = itemsCalculator,
+			section = itemCalculator,
 			position = 6
 	)
-	default GearTierType calculatorHalberdTier() {
+	default GearTierType calculatedHalberdTier() {
 		return GearTierType.None;
 	}
 
 	@ConfigItem(
-			keyName = "calculatorPotions",
+			keyName = "calculatedPotions",
 			name = "Enigol Potions",
 			description = "Number of Enigol potions you want to create",
-			section = itemsCalculator,
+			section = itemCalculator,
 			position = 7
 	)
-	default int calculatorPotions() { return 3; }
+	default int calculatedPotions() { return 3; }
 
 	@ConfigItem(
-			keyName = "calculatorPaddlefish",
+			keyName = "calculatedPaddlefish",
 			name = "Paddlefish",
 			description = "Number of Paddlefish you want to gather",
-			section = itemsCalculator,
+			section = itemCalculator,
 			position = 8
 	)
-	default int calculatorPaddlefish() { return 24; }
+	default int calculatedPaddlefish() { return 24; }
 
 	/**
 	 * Resource Highlighting Config Section, holds config values for highlighting different resources in The Gauntlet
